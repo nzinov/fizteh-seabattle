@@ -1,0 +1,2 @@
+/home/nikolay/fizteh-seabattle/server/bin/Release/fizteh-seabattle-gameserver.exe
+/home/nikolay/fizteh-seabattle/server/obj/x86/Release/fizteh-seabattle-gameserver.exe

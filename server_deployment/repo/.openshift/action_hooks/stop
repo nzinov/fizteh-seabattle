@@ -1,0 +1,4 @@
+#!/bin/bash
+source $OPENSHIFT_CARTRIDGE_SDK_BASH
+
+pkill mono || echo "Application is already stopped"
