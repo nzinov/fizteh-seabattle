@@ -4,6 +4,9 @@ using System.Text;
 using System.Net.Sockets;
 using System.Net;
 using Newtonsoft.Json;
+using Mono.Unix;
+using Mono.Unix.Native;
+
 namespace SeaBattleServer
 {
     static class Program
@@ -33,16 +36,13 @@ namespace SeaBattleServer
                 SaveGame(e);
 			}
 			Log("Start");
-			AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnExit);
+			UnixSignal term = new UnixSignal(Signum.SIGTERM);
+			term.WaitOne();
+			Log("Stop");
+			SaveGame(new Exception("Handling exit"));
+			System.Environment.Exit(0);
         }
         public static System.Collections.Generic.Dictionary<int, Game> Games;
-
-		public static void OnExit(object sender, EventArgs e)
-		{
-			Log("It works");
-			SaveGame(new Exception("Handling exit"));
-			Log("It works");
-		}
         public static void SaveGame(Exception e)
         {
             Log(e.ToString());

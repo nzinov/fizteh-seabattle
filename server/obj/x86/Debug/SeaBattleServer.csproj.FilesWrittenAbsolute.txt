@@ -1,4 +1,0 @@
-/home/nikolay/fizteh-seabattle/server/bin/Debug/fizteh-seabattle-gameserver.exe.mdb
-/home/nikolay/fizteh-seabattle/server/bin/Debug/fizteh-seabattle-gameserver.exe
-/home/nikolay/fizteh-seabattle/server/obj/x86/Debug/fizteh-seabattle-gameserver.exe
-/home/nikolay/fizteh-seabattle/server/obj/x86/Debug/fizteh-seabattle-gameserver.exe.mdb
