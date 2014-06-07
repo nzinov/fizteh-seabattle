@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Net.Sockets;
@@ -54,7 +55,7 @@ namespace SeaBattleServer
             if (e != null)
 				Log(e.ToString());
             System.IO.TextWriter writer = new System.IO.StreamWriter(dump_fname, false);
-            foreach (int i in Program.Games.Keys)
+            foreach (int i in Program.Games.Keys.Where(key => key > 0))
             {
 				writer.Write(i.ToString() + "@" + JsonConvert.SerializeObject(Program.Games[i]) + "\n");
             }
