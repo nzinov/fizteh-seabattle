@@ -5,13 +5,14 @@ usage :
 	@echo "	build_debug - builds Debug configuration and restarts server"
 	@echo "	test - make and start local server"
 	@echo "	check - checks php syntax"
-.PHONY : usage deploy test stop
+.PHONY : usage deploy test start stop
 debugdir = server/bin/Debug
 stop:
 	@pkill mono || echo "Application is stopped"
-test : stop check build_debug
-	sudo cp -r client/* /var/www/fizteh
+start: build_debug
 	pgrep mono || (mono $(debugdir)/fizteh-seabattle-gameserver.exe &)
+test : check
+	sudo cp -r client/* /var/www/fizteh
 deploy : deploy_client deploy_server
 deploy_client : check
 	cp -r client/* client_deployment/repo/php/

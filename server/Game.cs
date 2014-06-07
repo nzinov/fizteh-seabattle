@@ -901,7 +901,7 @@ namespace SeaBattleServer
 
 
 		System.IO.TextWriter history;
-		string history_fname;
+		public string history_fname;
 		void WriteHistory(string msg)
 		{
 			if (history == null)
@@ -1146,15 +1146,17 @@ namespace SeaBattleServer
 		{
 			Flush();
 			foreach (WebSocket el in players)
-				el.Finish();
+				if (el != null)
+					el.Finish();
 			foreach (WebSocket el in viewers)
-				el.Finish();
+				if (el != null)
+					el.Finish();
 			if (history != null) 
 			{
 				history.Close();
 				history = null;
 			}
-			new System.Net.WebClient().UploadFile("http://fizteh-seabattle.rhcloud.com/support.php?code=zekfor2967&page=save_history&id="+game_id, history_fname);
+			new System.Net.WebClient().UploadFile("http://fizteh-seabattle.rhcloud.com/support.php?code=zekfor2967&page=history&id="+game_id, history_fname);
 			Program.Games.Remove(game_id);
 		}
 

@@ -20,7 +20,7 @@ namespace SeaBattleServer
         static void Main()
         {
 			Program.Games = new Dictionary<int, Game>();
-			dump_fname = Environment.GetEnvironmentVariable("OPENSHIFT_DATA_DIR")+"dump.bin";
+			dump_fname = Environment.GetEnvironmentVariable("OPENSHIFT_DATA_DIR")+"games.dump";
 			log_fname = Environment.GetEnvironmentVariable("OPENSHIFT_DIY_LOG_DIR") + "errors.log";
 			if (System.IO.File.Exists(dump_fname))
 			{

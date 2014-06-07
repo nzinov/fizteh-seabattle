@@ -6,11 +6,11 @@ mysql_select_db($dbase,$link_id);
 mysql_query("set names 'utf8'");
 $page = $_GET['page'];
 echo "connect";
+$id = $_GET['id'];
 if ($page == "win" or $page == "draw")
 {
 $winner = ($page == "draw" ? -1 : $_GET['winner']-1);
 $looser = ($winner == 0 ? 1 : 0);
-$id = $_GET['id'];
 $game = mysql_query("SELECT `first`,`second`,`island` FROM `games` WHERE `id` = '$id'");
 $island = mysql_result($game,0,'island');
 $u =  array(mysql_result($game,0,'first'), mysql_result($game,0,'second'));
@@ -89,8 +89,14 @@ for ($i = 0; $i < 2; $i++)
 }
 else if ($page == "start")
 {
-    $id = $_GET['id'];
     mysql_query("UPDATE `games` SET `type` = 3 WHERE `id` = '$id'");
+}
+else if ($page == "history")
+{
+    foreach ($_FILES as $key => $file)
+    {
+        move_uploaded_file($file['tmp_name'], $history_dir."/".$file['name']);
+    }
 }
 echo "OK";
 ?>
