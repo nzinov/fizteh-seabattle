@@ -11,7 +11,6 @@ stop:
 	@pkill mono || echo "Application is stopped"
 test : stop check build_debug
 	sudo cp -r client/* /var/www/fizteh
-	touch dump.bin
 	pgrep mono || (mono $(debugdir)/fizteh-seabattle-gameserver.exe &)
 deploy : deploy_client deploy_server
 deploy_client : check
@@ -29,9 +28,8 @@ deploy_server : build
 build : server/*.cs
 	xbuild server/fizteh-seabattle-gameserver.sln
 	touch build
-build_debug : server/*.cs
+build_debug : server/*.cs stop
 	xbuild /p:Configuration=Debug server/fizteh-seabattle-gameserver.sln
-	@pkill mono || echo "Application is stopped"
 	(mono $(debugdir)/fizteh-seabattle-gameserver.exe &)
 	touch build_debug
 check : client/*.php
