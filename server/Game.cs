@@ -667,16 +667,18 @@ namespace SeaBattleServer
 					{
 						if (fig == FigType.Tp || (fig == FigType.Pl && oppfig != FigType.Lk) || (fig == FigType.KrPl && (oppfig == FigType.Kr || oppfig == FigType.Es || oppfig == FigType.Rd)))
 						{
-							EventBattle(agr.x, agr.y, tar.x, tar.y, fig, type, 1, str, false, Opponent(p));
+							EventBattle(agr.x, agr.y, tar.x, tar.y, fig, type, 1, str, false, player);
 							Destroy(agr.x, agr.y);
-							PhaseChange(PhaseType.Move, p);
+							PhaseChange(PhaseType.Move, Opponent(player));
 						}
 						else
 						{
-							EventBattle(agr.x, agr.y, tar.x, tar.y, 0, type, 0, str, true, Opponent(p));
+							EventBattle(agr.x, agr.y, tar.x, tar.y, 0, type, 0, str, true, player);
 							Destroy(tar.x, tar.y);
-							PhaseChange(PhaseType.Move, Opponent(p));
+							PhaseChange(PhaseType.Move, player);
 						}
+						blocks[0] = null;
+						blocks[1] = null;
 					}
 					else
 					{
