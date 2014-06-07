@@ -63,7 +63,6 @@ namespace SeaBattleServer
                 port = 8000;
 				s = "127.0.0.1";
             }
-            Console.WriteLine(s);
 			EndPoint ep = new IPEndPoint(IPAddress.Parse(s), port);
             ListenerSocket.Bind(ep);
             ListenerSocket.Listen(5);
