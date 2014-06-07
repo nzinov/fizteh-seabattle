@@ -14,50 +14,55 @@ namespace SeaBattleServer
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-        [STAThread]
+        static string dump_fname, log_fname;
+		[STAThread]
         static void Main()
         {
 			Program.Games = new Dictionary<int, Game>();
-			System.IO.TextReader file = new System.IO.StreamReader(Environment.GetEnvironmentVariable("OPENSHIFT_DATA_DIR")+"dump.bin", true);
-			string[] f = file.ReadToEnd().Split(new string[]{"№"},StringSplitOptions.RemoveEmptyEntries);
-			foreach (string el in f)
+			dump_fname = Environment.GetEnvironmentVariable("OPENSHIFT_DATA_DIR")+"dump.bin";
+			log_fname = Environment.GetEnvironmentVariable("OPENSHIFT_DIY_LOG_DIR") + "errors.log";
+			if (System.IO.File.Exists(dump_fname))
 			{
-				string[] s = el.Split('@');
-				Game cur = JsonConvert.DeserializeObject<Game>(s[1]);
-				Program.Games.Add(int.Parse(s[0]),cur);
+				System.IO.TextReader file = new System.IO.StreamReader(dump_fname, true);
+				string[] f = file.ReadToEnd().Split(new string[]{"\n"},StringSplitOptions.RemoveEmptyEntries);
+				foreach (string el in f)
+				{
+					string[] s = el.Split('@');
+					Program.Games.Add(int.Parse(s[0]),JsonConvert.DeserializeObject<Game>(s[1]));
+				}
+				file.Close();
 			}
-			file.Close();
 			try
 			{
 				WebSocket.Start();
 			}
 			catch (Exception e)
 			{
-                SaveGame(e);
+                Log("Startup fatal error: "+e.ToString());
+				System.Environment.Exit(0);
 			}
 			Log("Start");
 			UnixSignal term = new UnixSignal(Signum.SIGTERM);
 			term.WaitOne();
-			Log("Stop");
-			SaveGame(new Exception("Handling exit"));
+			Log("Terminate");
+			SaveGame();
 			System.Environment.Exit(0);
         }
         public static System.Collections.Generic.Dictionary<int, Game> Games;
-        public static void SaveGame(Exception e)
+        public static void SaveGame(Exception e = null)
         {
-            Log(e.ToString());
-            System.IO.TextWriter writer = new System.IO.StreamWriter(Environment.GetEnvironmentVariable("OPENSHIFT_DATA_DIR") + "dump.bin", false);
-            string buf = "";
+            if (e != null)
+				Log(e.ToString());
+            System.IO.TextWriter writer = new System.IO.StreamWriter(dump_fname, false);
             foreach (int i in Program.Games.Keys)
             {
-                buf += i.ToString() + "@" + JsonConvert.SerializeObject(Program.Games[i]) + "№";
+				writer.Write(i.ToString() + "@" + JsonConvert.SerializeObject(Program.Games[i]) + "\n");
             }
-            writer.Write(buf);
             writer.Close();
         }
         public static void Log(string mes)
         {
-            System.IO.TextWriter log = new System.IO.StreamWriter(Environment.GetEnvironmentVariable("OPENSHIFT_DIY_LOG_DIR") + "errors.log", true);
+            System.IO.TextWriter log = new System.IO.StreamWriter(log_fname, true);
             log.WriteLine(mes);
             log.Close();
         }

@@ -299,6 +299,7 @@ namespace SeaBattleServer
 		public Game(int i) : this()
         {
             this.game_id = i;
+			this.history_fname = Environment.GetEnvironmentVariable("OPENSHIFT_DATA_DIR") + "games/" + this.game_id + ".hist";
         }
         public void AddPlayer(WebSocket player, byte p)
         {
@@ -900,12 +901,13 @@ namespace SeaBattleServer
 
 
 		System.IO.TextWriter history;
+		string history_fname;
 		void WriteHistory(string msg)
 		{
 			if (history == null)
-				history = new System.IO.StreamWriter(Environment.GetEnvironmentVariable("OPENSHIFT_DATA_DIR") + "games/" + this.game_id + ".game", true);
+				history = new System.IO.StreamWriter(history_fname, true);
 			history.Write(msg);
-			history.Write('&');
+			history.Write('\n');
 		}
 
         bool FindSquare(byte x, byte y, FigType f, byte p)
@@ -1152,10 +1154,8 @@ namespace SeaBattleServer
 				history.Close();
 				history = null;
 			}
-			new System.Net.WebClient().UploadFile("http://fizteh-seabattle.rhcloud.com/support.php?code=zekfor2967&page=save_history&id="+game_id,
-			                                      Environment.GetEnvironmentVariable("OPENSHIFT_DIY_LOG_DIR") + this.game_id + ".game");
+			new System.Net.WebClient().UploadFile("http://fizteh-seabattle.rhcloud.com/support.php?code=zekfor2967&page=save_history&id="+game_id, history_fname);
 			Program.Games.Remove(game_id);
-
 		}
 
 		internal void SendState(WebSocket client, byte p)
