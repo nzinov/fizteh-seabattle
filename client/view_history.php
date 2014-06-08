@@ -1,43 +1,40 @@
 <?php
 session_start();
 include("constants.php");
-if (!isset($_SESSION['login']))
-    $error_msg = "Представьтесь, если вы хотите посмотреть трансляцию";
-else
+$link_id = mysql_connect($host, $username, $password);
+mysql_select_db($dbase,$link_id);
+mysql_query("set names 'utf8'");
+$id = $_GET['id'];
+$res = mysql_query("SELECT u1.login AS first, u2.login AS second, islands.name, games.type FROM `games`
+    LEFT JOIN `islands` ON `islands`.id=games.island 
+    JOIN `users` AS u1 ON u1.id=games.first
+    JOIN `users` AS u2 ON u2.id=games.second
+    WHERE games.`id`=$id;");
+$first = mysql_result($res,0,'first');
+$second = mysql_result($res,0,'second');
+$island = mysql_result($res,0,'name');
+$status = mysql_result($res,0,'type');
+if (mysql_num_rows($res) == 1)
 {
-    $id = $_GET['id'];
-    $link_id = mysql_connect($host, $username, $password);
-    mysql_select_db($dbase,$link_id);
-    mysql_query("set names 'utf8'");
-    $res = mysql_query("SELECT u1.login AS first, u2.login AS second, islands.name, games.type FROM `games`
-        LEFT JOIN `islands` ON `islands`.id=games.island 
-        JOIN `users` AS u1 ON u1.id=games.first
-        JOIN `users` AS u2 ON u2.id=games.second
-        WHERE games.`id`={$_GET['id']};");
-    $first = mysql_result($res,0,'first');
-    $second = mysql_result($res,0,'second');
-    $island = mysql_result($res,0,'name');
-    $status = mysql_result($res,0,'type');
-    $type = "";
-    if (mysql_num_rows($res) == 1)
+    if ($status < 3)
+        $error_msg = "Эта игра еще не началась";
+    else if ($status == 3)
+        $error_msg = "Эта игра сейчас идет, вы можете посмотреть ее <a href=view.php?id=$id>трансляцию</a>";
+    else
     {
-        if ($status < 3)
-            $error_msg = "Эта игра еще не началась";
-        else if ($status > 3)
-            $error_msg = "Игра уже закончилась, что насчёт посмотреть <a href=view_history.php?id=$id>запись?</a>";
-        else if ($first == $_SESSION['login'] or $second == $_SESSION['login'])
-            $error_msg = "Вы участвуете в этой игре, поэтому вам нельзя смотреть трансляцию";
-        else
-            $type = $_GET['id']." -1";
+        $fname = "$history_dir/$id.hist";
+        $lines = file($fname, FILE_IGNORE_NEW_LINES);
+        if (!$lines)
+            $error_msg = "К сожалению, нам не удалось записать эту игру";
     }
-    else $error_msg = "Игра не найдена. Возможно вам подсунули неправильную ссылку";
 }
+else $error_msg = "Игра не найдена. Возможно вам подсунули неправильную ссылку";
 ?>
 <!DOCTYPE html>
 
 <meta charset="utf-8" />
 
-<title>Морской бой по-физтеховски - Трансляция игры</title>
+<title>Морской бой по-физтеховски - Запись игры</title>
 <style>
 html,body {
       position: fixed;
@@ -54,22 +51,6 @@ html,body {
       aling: right;
       overflow: auto;
       margin-bottom: 20px;
-}
-#input {
-      position: fixed;
-      right: 20px;
-      bottom: 5px;
-      aling: right;
-      display: none;
-      width: 252px;
-}
-#answer{
-      position: fixed;
-      top: 5px;
-      display: none;
-      overflow: auto;
-      max-height: 100%;
-      left: 20px;
 }
 #field {
       margin-top: 5px;
@@ -101,48 +82,49 @@ html,body {
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
 <link rel="shortcut icon" href="SBpic/favicon.png">
 <script type="text/javascript" src="json.js"></script>
-<script type="text/javascript" src="log_view.js"></script>
+<script type="application/javascript;version=1.7" src="log_view.js"></script>
 <?php
-if ($type != "")
+if ($lines != false)
 {
+    echo "<script>";
+    echo "var history = [[";
+    foreach ($lines as $line_num => $line)
+    {
+        if ($line == '|')
+            echo "], [";
+        else
+            echo '"'.$line.'",';
+    }
+    echo "]];";
+    echo "</script>";
 ?>
-<script language="javascript" type="text/javascript">
-var debug = true;
-var showlog = false;
-var nolimit = false;
-
-
-var wsUri = "ws://server-seabattle.rhcloud.com:8000/";
-//var wsUri = "ws://10.0.1.6:8080/";
-var websocket;
+<script language="javascript" type="application/javascript;version=1.7">
 var output;
-var me = "<?=$_SESSION['login']?>";
 var first = "<?=$first?>";
 var second = "<?=$second?>";
-var inputshown = false;
 var fignum = 
 {
     AB : 1,
-        Av : 2,
-        Br : 3,
-        Es : 4,
-        F : 5,
-        Kr : 6,
-        KrPl : 7,
-        Lk : 8,
-        Mn : 9,
-        NB : 10,
-        Pl : 11,
-        Rd : 12,
-        Rk : 13,
-        Sm : 14,
-        St : 15,
-        T : 16,
-        Tk : 17,
-        Tp : 18,
-        Tr : 19,
-        Unknown : 20,
-        Sinking : 21
+    Av : 2,
+    Br : 3,
+    Es : 4,
+    F : 5,
+    Kr : 6,
+    KrPl : 7,
+    Lk : 8,
+    Mn : 9,
+    NB : 10,
+    Pl : 11,
+    Rd : 12,
+    Rk : 13,
+    Sm : 14,
+    St : 15,
+    T : 16,
+    Tk : 17,
+    Tp : 18,
+    Tr : 19,
+    Unknown : 20,
+    Sinking : 21
 }
 var figname = ['Null', 'AB', 'Av', 'Br', 'Es', 'F', 'Kr', 'KrPl', 'Lk', 'Mn', 'NB', 'Pl', 'Rd', 'Rk', 'Sm', 'St', 'T', 'Tk', 'Tp', 'Tr', 'Unknown', 'Sinking'];
 var info = [ "Пустая клетка",
@@ -167,19 +149,6 @@ var info = [ "Пустая клетка",
     "Тральщик<br> Может снимать мины, торпеды и брандеры (атакуя их). Образует блоки. 64 е.с.",
     "Корабль противника",
     "Ничейный корабль<br>Атакуйте его любым кораблем, чтобы забрать себе. Ход перейдет к противнику."];
-var sum = 30
-var dragging;
-var isshot;
-var movepassed = false;
-var isaoe;
-var agr;
-var tar;
-var asktype;
-var block = [];
-var b_str = [];
-var b_fig = [];
-var b_x = [];
-var b_y = [];
 function init()
 {
     $(window).resize(function (){
@@ -191,32 +160,8 @@ function init()
         $("#output").height($(window).height()-$("#header").height()-65);
         $("#output").scrollTop($("#output > div").height());
     }).resize();
-    $("body").keydown(function (evt) {
-        //alert (evt.which)
-        if (evt.which == 13)
-        {
-            if (!inputshown)
-            {
-                $("#input").fadeIn(1000);
-                inputshown = true;
-                $("#text").focus();
-            }
-            else
-            {
-                $("#input").fadeOut(1000);
-                inputshown = false;
-                if ($("#text").val() != "")
-                {
-                    doSend(me+": "+$("#text").val());
-                    $("#text").val("");
-                }
-            }
-            return false;
-        }
-    });
     output = document.getElementById("output");
-    testWebSocket();
-        $(".square").add(".prototype").popover({trigger: 'hover', placement: 'auto bottom', delay: {show: 1000}, html: true, container: 'body', content: function() { return info[$(this).attr("fig")];}});
+    $(".square").add(".prototype").popover({trigger: 'hover', placement: 'auto bottom', delay: {show: 1000}, html: true, container: 'body', content: function() { return info[$(this).attr("fig")];}});
     $(".square").bind( "touchmove", function(e){
         e.preventDefault();
     });
@@ -240,118 +185,108 @@ function init()
         e.preventDefault();
     });
 }
-function testWebSocket()
-{
-    websocket = new WebSocket(wsUri);
-    websocket.onopen = function(evt) { onOpen(evt) };
-    websocket.onclose = function(evt) { onClose(evt) };
-    websocket.onmessage = function(evt) { onMessage(evt) };
-    websocket.onerror = function(evt) { onError(evt) };
-}
-function onOpen(evt)
-{
-    doSend("<?echo $type?>");
-    writeToScreen("Подключено к серверу");
-}
-function onClose(evt)
-{
-    writeToScreen("Соединение закрыто");
-}
-c_type = ["url(displace_grab.cur), pointer", "url(displace.cur), move", "url(move.cur), move", "url(shot.cur), crosschair", "url(attack.cur), help", "url(radar.png) 15 15, wait", "pointer"];
 function onstatus()
 {
     $("#output").height($(window).height()-$("#header").height()-65);
     $("#output").scrollTop($("#output > div").height());
 }
-function onMessage(evt)
+var move = -1;
+var restore = [];
+var field = [];
+for (let i = 0; i < 14; i++)
 {
-    writeToScreen('<span style="color: blue;">Сообщение от сервера: ' + evt.data+'</span>');
-    mess = JSON.parse(evt.data)
-        if (mess.action == 1)
-        {
-            player = (mess.player == 1 ? first : second);
-            switch(mess.phase)
-            {
-            case 0:
-                $("#main").html("<h5>Расстановка</h5>");
-                break;
-            case 1:
-                $("#main").html("<h5>Ход игрока "+player+"</h5>");
-                break;
-            case 4:
-                $("#main").html("<h5>Ход игрока "+player+"</h5>");
-                break;
-            case 2:
-                if (player == 0) $("#main").html("<h5>Игра завершилась вничью.</h5>");
-                else $("#main").html("<h5>Игра окончена. Победил игрок "+player+"</h5>");
-                break;
-            case 3:
-                $("#main").html("<h5>Выбор блока</h5>");
-                break;
-            }
-            onstatus();
-        }
-        else if (mess.action == 4)
-        {
-            onbottom = ($("#output").scrollTop() > $("#output > div").height() - $("#output").height());
-            if (mess.player == 0) $("#output > div").append("<p class=\"log\">"+mess.message+"<p>");
-            else if (mess.player == 3) $("#output > div").append("<p style=\"color: gray\">"+mess.message+"<p>");
-            else
-            {
-                player = (mess.player == 1 ? first : second);
-                $("#output > div").append("<p style=\"color: black\">"+player+": "+mess.message+"<p>");
-            }
-            if (onbottom)
-                $("#output").scrollTop($("#output > div").height());
-        }
-        else if (mess.action == 3)
-        {
-            for (i = 0; i < mess.changex.length; i++)
-            {
-                x = mess.changex[i];
-                y = mess.changey[i];
-                fig = mess.changefig[i];
-                fig_player = fig / 100 | 0;
-                fig = fig % 100;
-                pos = $("[id='"+x+":"+y+"']"); 
-                if (fig_player == 0)
-                    pos.css("background-color", "white");
-                else if (fig_player == 1)
-                    pos.css("background-color", "#98ff98");
-                else if (fig_player == 2)
-                    pos.css("background-color", "#7fc7ff");
-                if (fig != 0)
-                    pos.attr("fig",fig).css("background-image","url('SBpic/"+figname[fig]+".png')");
-                else pos.attr("fig",fig).css("background-image","none");
-            }
-        }
-        else if (mess.action == 2)
-        {
-            LogParse(mess.log, first, second);
-        }
-        else if (mess.action == 0)
-        {
-            $("#main").html("Соединено с сервером. Игра еще не началась");
-        }
+    field[i] = [];
+    for (let j = 0; j < 14; j++)
+    {
+        field[i][j] = [0, 0];
+    }
 }
-function onError(evt)
+function to_int(x)
 {
-    $("#output").append('<p style="color: red;">Ошибка соединения с сервером</p>');
-    writeToScreen('<span style="color: red;">Произошла ошибка.</span> ' + evt.data);
-    if (!debug) return true;
+    return parseInt(x, 10)
 }
-function doSend(message)
+function set_fig(x, y, fig, player)
 {
-    writeToScreen("Отправил сообщение: " + message); 
-    websocket.send(message);
+    field[x][y] = [fig, player];
+    let pos = $("[id='"+x+":"+y+"']"); 
+    if (player == 0)
+        pos.css("background-color", "white");
+    else if (player == 1)
+        pos.css("background-color", "#98ff98");
+    else if (player == 2)
+        pos.css("background-color", "#7fc7ff");
+    if (fig != 0)
+        pos.attr("fig",fig).css("background-image","url('SBpic/"+figname[fig]+".png')");
+    else pos.attr("fig",fig).css("background-image","none");
 }
-
-function writeToScreen(message)
+function prev()
 {
-    if (showlog) $("#output").append("<p>"+message+"</p>");
+    while (restore[move].length < 1)
+        move--;
+    for each (act in restore[move])
+    {
+        field[act[0]][act[1]] = act[2];
+        set_fig(act[0], act[1], act[2][0], act[2][1]);
+    }
+    move--;
+}
+function next()
+{
+    onstatus();
+    move++;
+    var cur = history[move];
+    var active = false;
+    restore[move] = [];
+    for (let i = 0; i < cur.length; i++)
+    {
+        let act = cur[i];
+        if (act[0] == '<')
+        {
+            let prop = act.slice(1).split(':');
+            let win = prop.pop() == 'True';
+            prop = prop.map(to_int);
+            let log = {
+                type: prop[0],
+                player: prop[1],
+                from: {x: prop[2], y: prop[3]},
+                to: {x: prop[4], y: prop[5]},
+                agr: prop[6],
+                tar: prop[7],
+                agr_str: prop[8],
+                tar_str: prop[9],
+                win: win
+            };
+            LogParse(log, first, second);
+        }
+        else
+        {
+            let prop = act.split(':').map(to_int);
+            let x = prop[0];
+            let y = prop[1];
+            let fig = prop[2];
+            let player = prop[3];
+            restore[move].push([x, y, field[x][y]]);
+            set_fig(x, y, fig, player);
+            active = true;
+        }
+    }
+    if (!active)
+        next();
+}
+var playback;
+function play()
+{
+    $('#play-btn').prop('disabled',true);
+    $('#pause-btn').prop('disabled',false);
+    playback = window.setInterval(next, 1000);
+}
+function pause()
+{
+    $('#play-btn').prop('disabled',false);
+    $('#pause-btn').prop('disabled',true);
+    window.clearInterval(playback);
 }
 window.addEventListener("load", init, false);
-
 </script>
 <?php
 }
@@ -372,7 +307,6 @@ window.addEventListener("load", init, false);
     </div>
   </div>
 </div>
-<div id="input"><input id="text" type="text" size=30 style="background-color: #ffcc99; opacity: 0.9; border: none"></div>
 <div id="field"><table border>
 <?php
 if (isset($error_msg))
@@ -394,16 +328,21 @@ for ($i = 0; $i < 14;$i++)
 <div id="info">
 <div id="header" class="well">
 <h4><?=$first?> vs. <?=$second?><br/>
-<?
-if (!is_null($island))
-{
-?>
-<small>Cражение за влияние на острове <?=$island?></small>
-<?
-}
-?>
 </h4>
-<div id= "main" >Если это сообщение не исчезает дольше минуты, то, вероятно, возникла проблема при подключении к серверу</div>
+<div class="center-block">
+<button class="btn btn-primary" onclick=prev()>
+    <span class="glyphicon glyphicon-chevron-left">
+</button>
+<button class="btn btn-success" onclick=pause() disabled id="pause-btn">
+    <span class="glyphicon glyphicon-pause">
+</button>
+<button class="btn btn-success" onclick=play() id="play-btn">
+    <span class="glyphicon glyphicon-play">
+</button>
+<button class="btn btn-primary" onclick=next()>
+    <span class="glyphicon glyphicon-chevron-right">
+</button>
+</div>
 </div>
 <div id="output" ><div></div></div>
 </div>

@@ -7,6 +7,7 @@ if ($_GET['pass'] == "ribapila")
 }
 else
 {
+    $id = $_GET['id'];
     $link_id = mysql_connect($host, $username, $password);
     mysql_select_db($dbase,$link_id);
     mysql_query("set names 'utf8'");
@@ -24,8 +25,8 @@ else
     {
         if ($status > 3)
         {
-            $error_title = "Вы уже сыграли этот матч";
-            $error_msg = "Хотите посмотреть его в записи?";
+            $error_title = "Это матч завершен";
+            $error_msg = "Хотите посмотреть его в <a href=view_history.php?id=$id>записи</a>?";
         }
         else if ($first == $_SESSION['login'])
         {
