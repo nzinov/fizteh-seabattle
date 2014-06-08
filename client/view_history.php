@@ -98,7 +98,7 @@ if ($lines != false)
     echo "]];";
     echo "</script>";
 ?>
-<script language="javascript" type="application/javascript;version=1.7">
+<script language="javascript" type="application/javascript">
 var output;
 var first = "<?=$first?>";
 var second = "<?=$second?>";
@@ -193,10 +193,10 @@ function onstatus()
 var move = -1;
 var restore = [];
 var field = [];
-for (let i = 0; i < 14; i++)
+for (var i = 0; i < 14; i++)
 {
     field[i] = [];
-    for (let j = 0; j < 14; j++)
+    for (var j = 0; j < 14; j++)
     {
         field[i][j] = [0, 0];
     }
@@ -208,7 +208,7 @@ function to_int(x)
 function set_fig(x, y, fig, player)
 {
     field[x][y] = [fig, player];
-    let pos = $("[id='"+x+":"+y+"']"); 
+    var pos = $("[id='"+x+":"+y+"']"); 
     if (player == 0)
         pos.css("background-color", "white");
     else if (player == 1)
@@ -223,8 +223,9 @@ function prev()
 {
     while (restore[move].length < 1)
         move--;
-    for each (act in restore[move])
+    for (var i in restore[move])
     {
+        act = restore[move][i];
         field[act[0]][act[1]] = act[2];
         set_fig(act[0], act[1], act[2][0], act[2][1]);
     }
@@ -237,15 +238,15 @@ function next()
     var cur = history[move];
     var active = false;
     restore[move] = [];
-    for (let i = 0; i < cur.length; i++)
+    for (var i = 0; i < cur.length; i++)
     {
-        let act = cur[i];
+        var act = cur[i];
         if (act[0] == '<')
         {
-            let prop = act.slice(1).split(':');
-            let win = prop.pop() == 'True';
+            var prop = act.slice(1).split(':');
+            var win = prop.pop() == 'True';
             prop = prop.map(to_int);
-            let log = {
+            var log = {
                 type: prop[0],
                 player: prop[1],
                 from: {x: prop[2], y: prop[3]},
@@ -260,11 +261,11 @@ function next()
         }
         else
         {
-            let prop = act.split(':').map(to_int);
-            let x = prop[0];
-            let y = prop[1];
-            let fig = prop[2];
-            let player = prop[3];
+            var prop = act.split(':').map(to_int);
+            var x = prop[0];
+            var y = prop[1];
+            var fig = prop[2];
+            var player = prop[3];
             restore[move].push([x, y, field[x][y]]);
             set_fig(x, y, fig, player);
             active = true;
