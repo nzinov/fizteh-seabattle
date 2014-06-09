@@ -221,8 +221,6 @@ function set_fig(x, y, fig, player)
 }
 function prev()
 {
-    while (restore[move].length < 1)
-        move--;
     for (var i in restore[move])
     {
         act = restore[move][i];
@@ -236,7 +234,6 @@ function next()
     onstatus();
     move++;
     var cur = history[move];
-    var active = false;
     restore[move] = [];
     for (var i = 0; i < cur.length; i++)
     {
@@ -268,11 +265,8 @@ function next()
             var player = prop[3];
             restore[move].push([x, y, field[x][y]]);
             set_fig(x, y, fig, player);
-            active = true;
         }
     }
-    if (!active)
-        next();
 }
 var playback;
 function play()
