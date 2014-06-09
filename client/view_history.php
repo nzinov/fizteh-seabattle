@@ -184,6 +184,7 @@ function init()
         $(document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)).mouseup();
         e.preventDefault();
     });
+    next();
 }
 function onstatus()
 {
@@ -219,8 +220,17 @@ function set_fig(x, y, fig, player)
         pos.attr("fig",fig).css("background-image","url('SBpic/"+figname[fig]+".png')");
     else pos.attr("fig",fig).css("background-image","none");
 }
+function update()
+{
+    $('#move').val(move); 
+}
 function prev()
 {
+    if (move == 0)
+    {
+        pause();
+        return;
+    }
     for (var i in restore[move])
     {
         act = restore[move][i];
@@ -228,10 +238,16 @@ function prev()
         set_fig(act[0], act[1], act[2][0], act[2][1]);
     }
     move--;
+    update();
 }
 function next()
 {
     onstatus();
+    if (move == history.length)
+    {
+        pause();
+        return;
+    }
     move++;
     var cur = history[move];
     restore[move] = [];
@@ -267,19 +283,53 @@ function next()
             set_fig(x, y, fig, player);
         }
     }
+    update();
+}
+function set_move(m)
+{
+    while (move < m)
+        next();
+    while (move > m)
+        prev();
+}
+function onmove()
+{
+    set_move($('#move').val());
 }
 var playback;
-function play()
+var delay = 512;
+var is_fast = false;
+var direction = next;
+function pl(dir, delay)
 {
     $('#play-btn').prop('disabled',true);
     $('#pause-btn').prop('disabled',false);
-    playback = window.setInterval(next, 1000);
+    window.clearInterval(playback);
+    playback = window.setInterval(dir, delay);
+}
+function fast(dir)
+{
+    if (is_fast && dir == direction)
+    {
+        if (delay > 1)
+          delay /= 2;
+    }
+    else
+        delay = 512;
+    pl(dir, delay);
+    is_fast = true;
+    direction = dir;
+}
+function play()
+{
+    pl(next, 1000);
 }
 function pause()
 {
     $('#play-btn').prop('disabled',false);
     $('#pause-btn').prop('disabled',true);
     window.clearInterval(playback);
+    is_fast = false;
 }
 window.addEventListener("load", init, false);
 </script>
@@ -328,11 +378,18 @@ for ($i = 0; $i < 14;$i++)
 <button class="btn btn-primary" onclick=prev()>
     <span class="glyphicon glyphicon-chevron-left">
 </button>
+<button class="btn" onclick=fast(prev) id="fast-btn">
+    <span class="glyphicon glyphicon-fast-backward">
+</button>
 <button class="btn btn-success" onclick=pause() disabled id="pause-btn">
     <span class="glyphicon glyphicon-pause">
 </button>
+<input class="form-control" onchange=onmove() style="display: inline; width: 70px;" type="number" min=1 value=1 id="move">
 <button class="btn btn-success" onclick=play() id="play-btn">
     <span class="glyphicon glyphicon-play">
+</button>
+<button class="btn" onclick=fast(next) id="fast-btn">
+    <span class="glyphicon glyphicon-fast-forward">
 </button>
 <button class="btn btn-primary" onclick=next()>
     <span class="glyphicon glyphicon-chevron-right">
