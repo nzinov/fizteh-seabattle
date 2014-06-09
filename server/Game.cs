@@ -200,8 +200,9 @@ namespace SeaBattleServer
                 bufferfig[1] = new List<int>();
 				bufferfig[2] = new List<int>();
             }
-            public void Flush()
+            public bool Flush()
             {
+				bool eff = bufferx.Count > 0;
                 game.Send(new ToClient
                 {
                     action = 3,
@@ -228,6 +229,7 @@ namespace SeaBattleServer
 				bufferfig[0].Clear();
 				bufferfig[1].Clear();
 				bufferfig[2].Clear();
+				return eff;
             }
         }
         ChangesBuffer buffer;
@@ -995,8 +997,8 @@ namespace SeaBattleServer
 
         private void Flush()
         {
-            buffer.Flush();
-			WriteHistory("|");
+            if (buffer.Flush())
+				WriteHistory("|");
         }
 
         private void Send(ToClient mess, byte p)
