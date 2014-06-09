@@ -1055,12 +1055,6 @@ namespace SeaBattleServer
 							if (mess.pass) {
 								if (player == p) {
 									movepassed = true;
-									Log(new Event
-                                        {
-                                            type = EventType.Pass,
-                                            player = p
-                                        }
-									);
 									PhaseChange(PhaseType.Attack, p);
 								}
 							} else if (mess.isshot) {
@@ -1074,12 +1068,6 @@ namespace SeaBattleServer
 									if (movepassed)
 										PhaseChange(PhaseType.Move, p);
 									else {
-										Log(new Event
-                                            {
-                                                type = EventType.Pass,
-                                                player = p
-                                            }
-										);
 										PhaseChange(PhaseType.Move, Opponent(p));
 									}
 								}
