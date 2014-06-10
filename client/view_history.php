@@ -381,10 +381,10 @@ for ($i = 0; $i < 14;$i++)
 <button class="btn" onclick=fast(prev) id="fast-btn">
     <span class="glyphicon glyphicon-fast-backward">
 </button>
+<input class="form-control" onchange=onmove() style="display: inline; width: 70px;" type="number" min=1 value=1 id="move">
 <button class="btn btn-success" onclick=pause() disabled id="pause-btn">
     <span class="glyphicon glyphicon-pause">
 </button>
-<input class="form-control" onchange=onmove() style="display: inline; width: 70px;" type="number" min=1 value=1 id="move">
 <button class="btn btn-success" onclick=play() id="play-btn">
     <span class="glyphicon glyphicon-play">
 </button>

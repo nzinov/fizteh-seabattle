@@ -31,10 +31,12 @@ else
         else if ($first == $_SESSION['login'])
         {
             $type = $_GET['id']." 1";
+            $opponent = $second;
         }
         else if ($second == $_SESSION['login'])
         {
             $type = $_GET['id']." 2";
+            $opponent = $first;
         }
         else 
         {
@@ -136,6 +138,7 @@ var showlog = false;
 
 
 var wsUri = "ws://<?=($_SERVER['HTTP_HOST'] == 'localhost' ? "localhost" : "server-seabattle.rhcloud.com")?>:8000/";
+var opponent = '<?=$opponent;?>';
 var websocket;
 var output;
 var you;
@@ -215,6 +218,7 @@ function trigaoe()
     isaoe = !isaoe;
     $("#aoeon").html(isaoe ? "<span style=\"color: green\">включен</span>" : "<span style=\"color: red\">выключен</span>");
 }
+var page_visible = true;
 function init()
 {
     for (i = 0; i< 14; i++)
@@ -304,6 +308,13 @@ function init()
         $(document.elementFromPoint(e.originalEvent.changedTouches[0].pageX - window.pageXOffset, e.originalEvent.changedTouches[0].pageY - window.pageYOffset)).mouseup();
         e.preventDefault();
     });
+    window.onfocus = function () {
+        page_visible = true;
+    };
+    window.onblur = function () {
+        page_visible = false;
+    };
+    Notification.requestPermission();
 }
 function testWebSocket()
 {
@@ -451,134 +462,150 @@ function setfig(x, y, fig)
 function onMessage(evt)
 {
     writeToScreen('<span style="color: blue;">Сообщение от сервера: ' + evt.data+'</span>');
-    mess = JSON.parse(evt.data)
-        if (mess.action == 1)
+    mess = JSON.parse(evt.data);
+    if (mess.action == 1)
+    {
+        phase = mess.phase;
+        player = mess.player;
+        writeToScreen(page_visible);
+        if (phase == 3 || (player == you && (phase == 1 || phase == 3)))
         {
-            phase = mess.phase;
-            player = mess.player;
-            switch(mess.phase)
+            writeToScreen('inner clause');
+            if (!page_visible)
             {
-            case 0:
-                if (mess.player != you) 
+                writeToScreen('notif');
+                var n = new Notification("Ваш ход", {
+                    tag : "your-move",
+                    body : "Действуйте в игре с "+opponent,
+                });
+            }
+            document.title = "<Действуйте!> Игра против "+opponent;
+        }
+        else
+            document.title = "Игра против "+opponent;
+        switch(phase)
+        {
+        case 0:
+            if (player != you) 
+            {
+                setcursor(0);
+                $("#main").html('<h4>Расставьте корабли</h4><a onclick=displace()>Нажмите</a> Пробел, когда будете готовы');
+                zone = you == 1 ? $("[id^='0:'],[id^='1:'],[id^='2:'],[id^='3:'],[id^='4:']") : $("[id^='9:'],[id^='10:'],[id^='11:'],[id^='12:'],[id^='13:']");
+                draggable($(".square"),true);
+                droppable($(".square"),true);
+                zone.css("background-color","#98ff98");
+                cur = you != 1 ? 0 : 9*14;
+                for (i = 0; i < count.length; i++)
                 {
-                    setcursor(0);
-                    $("#main").html('<h4>Расставьте корабли</h4><a onclick=displace()>Нажмите</a> Пробел, когда будете готовы');
-                    zone = you == 1 ? $("[id^='0:'],[id^='1:'],[id^='2:'],[id^='3:'],[id^='4:']") : $("[id^='9:'],[id^='10:'],[id^='11:'],[id^='12:'],[id^='13:']");
-                    draggable($(".square"),true);
-                    droppable($(".square"),true);
-                    zone.css("background-color","#98ff98");
-                    cur = you != 1 ? 0 : 9*14;
-                    for (i = 0; i < count.length; i++)
+                    for (j = 0; j < count[i]; j++)
                     {
-                        for (j = 0; j < count[i]; j++)
-                        {
-                            setfig(Math.floor(cur/14), cur%14, i);
-                            cur++;
-                        }
+                        setfig(Math.floor(cur/14), cur%14, i);
+                        cur++;
                     }
                 }
-                else 
-                {
-                    setcursor(5);
-                    $("#main").html("<h4>Ждите</h4>Противник на вашу погибель готовит подводные лодки");
-                }
-                break;
-            case 1:
-                $(".square").css("background-color","#FFFFFF");
-                draggable($(".square"),true);
-                droppable($(".square"),true);
-                if (player == you) 
-                {
-                    setcursor(2);
-                    movepassed = false;
-                    isshot = false;
-                    setshot(false);
-                    $("#main").html('<h4 id="shot">Ходите</h4><a onclick=movepass()>Нажмите</a> Пробел чтобы пропустить ход. <a onclick=shottrig()>Нажмите</a> S, чтобы переключить режим выстрела.<div id="aoe" style="display: none;">Площадной эффект ракеты <span id="aoeon">выключен</span>.<a onclick=trigaoe()>Нажмите</a> "R" для переключения</div>');
-                    trigaoe();
-
-                }
-                else 
-                {
-                    setcursor(5);
-                    $("#main").html("<h4>Ждите</h4>Ход противника.");
-                }
-                break;
-            case 4:
-                draggable($(".square"),true);
-                droppable($(".square"),true);
-                if (player == you) 
-                {
-                    setcursor(4);
-                    $("#main").html('<h4>Атакуйте</h4>Чтобы '+(movepassed ? 'вернуться к фазе хода' : 'пропустить атаку')+' <a onclick=attackpass()>нажмите</a> Пробел');
-                }
-                else 
-                {
-                    setcursor(5);
-                    $("#main").html("<h4>Ждите</h4>Противник атакует.");
-                }
-                break;
-            case 2:
-                setcursor(6);
-                $("#main").html("<h4>Игра окончена</h4>");
-                if (player == 0) show_modal("Игра окончена", "Игра завершилась вничью.");
-                else if (player == you) show_modal("Игра окончена","Вы победили. Поздравляем!!!");
-                else show_modal("Игра окончена","Вы проиграли. Обидно Вам наверное...");
-                break;
-            case 3:
-                $("#main").html("<h4>Выберите блок</h4>");
-                tar = [mess.targetx,mess.targety]
-                agr = [mess.agressorx,mess.agressory]
-                if (player == you)
-                {
-                    asktype = "agr";
-                    cor = agr
-                }
-                else
-                {
-                    asktype = "tar";
-                    cor = tar
-                }
-                if (field[cor[0]][cor[1]] == "Pl" || field[cor[0]][cor[1]] == "KrPl")
-                    break;
-                $("[id='"+agr[0]+':'+agr[1]+"']").css("background-color","#2a52be");
-                $("[id='"+tar[0]+':'+tar[1]+"']").css("background-color","#ff0033");
-                setcursor(6);
-                block[cor[0]] = [];
-                block[cor[0]][cor[1]] = true;
-                AddBlock(1,field[cor[0]][cor[1]],[cor[0]],[cor[1]]);
-                $(".square").click(FindBlock);
-                $("#answer").show();
-                break;
             }
-            onstatus();
-        }
-        else if (mess.action == 4)
-        {
-            onbottom = ($("#output").scrollTop() > $("#output > div").height() - $("#output").height());
-            if (mess.player == 0) $("#output > div").append("<p class=\"log\">"+mess.message+"<p>");
-            else $("#output > div").append("<p style=\"color: "+(mess.player == you ? "gray" : "black")+"\">"+mess.message+"<p>");
-            if (onbottom)
-                $("#output").scrollTop($("#output > div").height());
-        }
-        else if (mess.action == 3)
-        {
-            for (i = 0; i < mess.changex.length; i++)
+            else 
             {
-                x = mess.changex[i];
-                y = mess.changey[i];
-                fig = mess.changefig[i];
-                setfig(x, y, fig);
+                setcursor(5);
+                $("#main").html("<h4>Ждите</h4>Противник на вашу погибель готовит подводные лодки");
             }
+            break;
+        case 1:
+            $(".square").css("background-color","#FFFFFF");
+            draggable($(".square"),true);
+            droppable($(".square"),true);
+            if (player == you) 
+            {
+                setcursor(2);
+                movepassed = false;
+                isshot = false;
+                setshot(false);
+                $("#main").html('<h4 id="shot">Ходите</h4><a onclick=movepass()>Нажмите</a> Пробел чтобы пропустить ход. <a onclick=shottrig()>Нажмите</a> S, чтобы переключить режим выстрела.<div id="aoe" style="display: none;">Площадной эффект ракеты <span id="aoeon">выключен</span>.<a onclick=trigaoe()>Нажмите</a> "R" для переключения</div>');
+                trigaoe();
+
+            }
+            else 
+            {
+                setcursor(5);
+                $("#main").html("<h4>Ждите</h4>Ход противника.");
+            }
+            break;
+        case 4:
+            draggable($(".square"),true);
+            droppable($(".square"),true);
+            if (player == you) 
+            {
+                setcursor(4);
+                $("#main").html('<h4>Атакуйте</h4>Чтобы '+(movepassed ? 'вернуться к фазе хода' : 'пропустить атаку')+' <a onclick=attackpass()>нажмите</a> Пробел');
+            }
+            else 
+            {
+                setcursor(5);
+                $("#main").html("<h4>Ждите</h4>Противник атакует.");
+            }
+            break;
+        case 2:
+            setcursor(6);
+            $("#main").html("<h4>Игра окончена</h4>");
+            if (player == 0) show_modal("Игра окончена", "Игра завершилась вничью.");
+            else if (player == you) show_modal("Игра окончена","Вы победили. Поздравляем!!!");
+            else show_modal("Игра окончена","Вы проиграли. Обидно Вам наверное...");
+            break;
+        case 3:
+            $("#main").html("<h4>Выберите блок</h4>");
+            tar = [mess.targetx,mess.targety]
+            agr = [mess.agressorx,mess.agressory]
+            if (player == you)
+            {
+                asktype = "agr";
+                cor = agr
+            }
+            else
+            {
+                asktype = "tar";
+                cor = tar
+            }
+            if (field[cor[0]][cor[1]] == "Pl" || field[cor[0]][cor[1]] == "KrPl")
+                break;
+            $("[id='"+agr[0]+':'+agr[1]+"']").css("background-color","#2a52be");
+            $("[id='"+tar[0]+':'+tar[1]+"']").css("background-color","#ff0033");
+            setcursor(6);
+            block[cor[0]] = [];
+            block[cor[0]][cor[1]] = true;
+            AddBlock(1,field[cor[0]][cor[1]],[cor[0]],[cor[1]]);
+            $(".square").click(FindBlock);
+            $("#answer").show();
+            break;
         }
-        else if (mess.action == 2)
+        onstatus();
+    }
+    else if (mess.action == 4)
+    {
+        onbottom = ($("#output").scrollTop() > $("#output > div").height() - $("#output").height());
+        if (mess.player == 0) $("#output > div").append("<p class=\"log\">"+mess.message+"<p>");
+        else $("#output > div").append("<p style=\"color: "+(mess.player == you ? "gray" : "black")+"\">"+mess.message+"<p>");
+        if (onbottom)
+            $("#output").scrollTop($("#output > div").height());
+    }
+    else if (mess.action == 3)
+    {
+        for (i = 0; i < mess.changex.length; i++)
         {
-            LogParse(mess.log);
+            x = mess.changex[i];
+            y = mess.changey[i];
+            fig = mess.changefig[i];
+            setfig(x, y, fig);
         }
-        else if (mess.action == 0)
-        {
-            you = mess.you;
-            $("#main").html("Соединено с сервером. Ждите, пока подключится ваш противник.");
-        }
+    }
+    else if (mess.action == 2)
+    {
+        LogParse(mess.log);
+    }
+    else if (mess.action == 0)
+    {
+        you = mess.you;
+        $("#main").html("Соединено с сервером. Ждите, пока подключится ваш противник.");
+    }
 }
 function onError(evt)
 {
@@ -598,7 +625,7 @@ function doSend(message)
 
 function writeToScreen(message)
 {
-    if (showlog) $("#output").append("<p>"+message+"</p>");
+    if (show_log) $("#output > div").append("<p>"+message+"</p>");
 }
 function FindBlock(evt)
 {

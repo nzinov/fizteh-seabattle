@@ -3,5 +3,6 @@
 # script. The application will work only if it binds to
 # $OPENSHIFT_INTERNAL_IP:8080
 export PATH=$PATH:$OPENSHIFT_DATA_DIR/mono/bin/
+export LD_LIBRARY_PATH=$OPENSHIFT_DATA_DIR/mono/lib/
 cd $OPENSHIFT_REPO_DIR/diy
 mono fizteh-seabattle-gameserver.exe &
