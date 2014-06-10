@@ -1081,7 +1081,7 @@ namespace SeaBattleServer
 							AttackAnswering(mess.blockstrength, mess.blocktype, mess.blockx, mess.blocky, p);
 							break;
 						}
-						if (phase != PhaseType.Asking)
+						if (phase != PhaseType.Asking && phase != PhaseType.Displacing)
 							Flush();
 						break;
 					case 3:
