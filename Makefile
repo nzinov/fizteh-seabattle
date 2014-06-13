@@ -15,7 +15,7 @@ test : check
 	sudo cp -r client/* /var/www/fizteh
 deploy : deploy_client deploy_server
 deploy_client : check
-	cp -r client/* client_deployment/repo/php/
+	cp -r client/* client_deployment/repo/
 	cd client_deployment && tar -czf production.tar.gz *
 	rhc deploy client_deployment/production.tar.gz --app fizteh --hot-deploy
 	rm client_deployment/production.tar.gz
