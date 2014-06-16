@@ -328,11 +328,11 @@ function testWebSocket()
 function onOpen(evt)
 {
     doSend("<?echo $type?>");
-    writeToScreen("Подключено к серверу");
+    console.info("Подключено к серверу");
 }
 function onClose(evt)
 {
-    writeToScreen("Соединение закрыто");
+    console.info("Соединение закрыто");
 }
 c_type = ["url(displace_grab.cur), pointer", "url(displace.cur), move", "url(move.cur), move", "url(shot.cur), crosschair", "url(attack.cur), help", "url(radar.png) 15 15, wait", "pointer"];
 function setcursor(type)
@@ -462,19 +462,16 @@ function setfig(x, y, fig)
 }
 function onMessage(evt)
 {
-    writeToScreen('<span style="color: blue;">Сообщение от сервера: ' + evt.data+'</span>');
+    console.log('<span style="color: blue;">Сообщение от сервера: ' + evt.data+'</span>');
     mess = JSON.parse(evt.data);
     if (mess.action == 1)
     {
         phase = mess.phase;
         player = mess.player;
-        writeToScreen(page_visible);
         if (phase == 3 || (player == you && (phase == 1 || phase == 3)))
         {
-            writeToScreen('inner clause');
             if (!page_visible)
             {
-                writeToScreen('notif');
                 var n = new Notification("Ваш ход", {
                     tag : "your-move",
                     body : "Действуйте в игре с "+opponent,
@@ -624,7 +621,7 @@ function onMessage(evt)
 function onError(evt)
 {
     $("#output").append('<p style="color: red;">Ошибка соединения с сервером</p>');
-    writeToScreen('<span style="color: red;">Произошла ошибка.</span> ' + evt.data);
+    console.error('<span style="color: red;">Произошла ошибка.</span> ' + evt.data);
     if (!debug) return true;
 }
 function SendJSON(mess)
@@ -633,13 +630,8 @@ function SendJSON(mess)
 }
 function doSend(message)
 {
-    writeToScreen("Отправил сообщение: " + message); 
+    console.log("Отправил сообщение: " + message); 
     websocket.send(message);
-}
-
-function writeToScreen(message)
-{
-    if (show_log) $("#output > div").append("<p>"+message+"</p>");
 }
 function FindBlock(evt)
 {
