@@ -1,6 +1,6 @@
 <?php
 //ini_set('display_errors','On'); ini_set('error_reporting','E_ALL'); error_reporting(E_ALL);
-include("functions.php");
+include_once("functions.php");
 $link_id = mysql_connect($host, $username, $password);
 mysql_select_db($dbase,$link_id);
 mysql_query("set names 'utf8'");
