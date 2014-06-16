@@ -219,6 +219,7 @@ function trigaoe()
     $("#aoeon").html(isaoe ? "<span style=\"color: green\">включен</span>" : "<span style=\"color: red\">выключен</span>");
 }
 var page_visible = true;
+const DB_KEY = 'seabattle-displacing';
 function init()
 {
     for (i = 0; i< 14; i++)
@@ -361,6 +362,7 @@ function displace()
     SendJSON({action: 1, phase: 0, field: f});
     if (you == 1) droppable($("[id^='0:'],[id^='1:'],[id^='2:'],[id^='3:'],[id^='4:']"),false);
     else droppable($("[id^='9:'],[id^='10:'],[id^='11:'],[id^='12:'],[id^='13:']"),false);
+    localStorage.removeItem(DB_KEY);
 }
 function onstatus()
 {
@@ -404,10 +406,9 @@ function ondrop(evt)
             buf = field[x][y] 
             field[x][y] = field[sx][sy];
             field[sx][sy] = buf
-            $(this).attr("fig",field[x][y]);
-            drag.attr("fig",field[sx][sy]);
-            $(this).css("background-image","url('SBpic/"+figname[field[x][y]]+".png')");
-            drag.css("background-image","url('SBpic/"+figname[field[sx][sy]]+".png')");
+            setfig(x, y, field[x][y]);
+            setfig(sx, sy, field[sx][sy]);
+            localStorage.setItem(DB_KEY, JSON.stringify(you == 1 ? field : field.slice().reverse()));
         }
         setcursor(0);
     }
@@ -494,13 +495,26 @@ function onMessage(evt)
                 draggable($(".square"),true);
                 droppable($(".square"),true);
                 zone.css("background-color","#98ff98");
-                cur = you != 1 ? 0 : 9*14;
-                for (i = 0; i < count.length; i++)
+                var displ = localStorage.getItem(DB_KEY);
+                if (displ !== null && confirm('Обнаружена незавершенная расстановка. Вы хотите ее продолжить?'))
                 {
-                    for (j = 0; j < count[i]; j++)
+                    field = JSON.parse(displ);
+                    if (you == 2)
+                        field.reverse();
+                    for (var i = 0; i < 14; i++)
+                        for (var j = 0; j < 14; j++)
+                            setfig(i, j, field[i][j]);
+                }
+                else
+                {
+                    cur = you != 1 ? 0 : 9*14;
+                    for (i = 0; i < count.length; i++)
                     {
-                        setfig(Math.floor(cur/14), cur%14, i);
-                        cur++;
+                        for (j = 0; j < count[i]; j++)
+                        {
+                            setfig(Math.floor(cur/14), cur%14, i);
+                            cur++;
+                        }
                     }
                 }
             }
