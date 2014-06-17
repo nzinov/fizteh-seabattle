@@ -119,6 +119,12 @@ $page = "main";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
+    <meta name="google-signin-callback" content="signinCallback" />
+    <meta name="google-signin-clientid" content="220267231332-46hns53sk33pkpbqc4ohd1iu913nreu0.apps.googleusercontent.com" />
+    <meta name="google-signin-cookiepolicy" content="single_host_origin" />
+    <meta name="google-signin-callback" content="signinCallback" />
+    <meta name="google-signin-requestvisibleactions" content="https://schemas.google.com/AddActivity" />
+    <meta name="google-signin-scope" content="https://www.googleapis.com/auth/plus.login" />
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
 	<script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
@@ -136,10 +142,39 @@ $page = "main";
     </style>
     <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
     <link rel="shortcut icon" href="SBpic/favicon.png">
+    <script type="text/javascript" src="https://apis.google.com/js/client:plusone.js"></script>
+    <script type="text/javascript">
+       function onload()
+       {
+       var signinButton = document.getElementById('signinButton');
+       signinButton.addEventListener('click', function() {
+           gapi.auth.signIn(); // Will use page level configuration
+       });
+       }
+       function signinCallback(authResult)
+       {
+           if (authResult['status']['signed_in'])
+           {
+               gapi.client.load('plus','v1', function () {
+               $('#signinButton').hide();
+               var request = gapi.client.plus.people.get(
+               {
+                  'userId': 'me'
+               });
+               request.execute(function (resp)
+               {
+                    str = "<img class='pull-left img-circle' height=45 src='" + resp['image']['url'] + "' /><p class=navbar-text>" + resp['displayName'] + "</p>";
+                    document.getElementById("profile").innerHTML = str;
+               }); 
+               });
+            }
+       }
+window.addEventListener('load', onload);
+    </script>
+
   </head>
 
   <body data-spy="scroll"> 
-
     <div class="navbar navbar-default">
           <a class="navbar-brand" href="index.php">Морской бой по-физтеховски</a>
             <ul class="nav navbar-nav">
@@ -150,13 +185,10 @@ $page = "main";
 			  <li id="bugreport"><a href="index.php?page=bugreport">Сообщить об ошибке</a></li>
 			  <li id="ai"><a class="indevelop" href="#" rel="tooltip" title="Разрабатывается">Бой программ</a></li>
             </ul>
+     <button id="signinButton" class="btn btn-primary navbar-btn">Войти через Google</button>
+<div  id="profile" class="pull-left"> </div>
 <?
-if (!isset($_SESSION['login']))
-{
-     echo "<button id=\"log\"class=\"btn btn-primary navbar-btn\">Представиться</button>";
-	 echo "<script> $('#log').popover({html: true, placement: 'bottom', trigger: 'click', title: 'Представьтесь пожалуйста:', content: '<form class=\"form-horizontal\" style=\"margin: 5px;\" action=\"index.php?page=login\" method=\"POST\" ><div class=\"form-group\"><label class=\"control-label\" for=\"login\">Ваше имя</label><input class=\"col-md-2 form-control\" type=\"text\" id=\"login\" name=\"login\" placeholder=\"Имя\" value=\"\"></div><div class=\"form-group\"><label class=\"control-label\" for=\"password\">Пароль</label><input class=\"col-md-2 form-control\" type=\"password\" id=\"password\" name=\"password\" placeholder=\"Пароль\" value=\"\"></div><div class=\"form-group\"><button type=\"submit\" class=\"btn btn-primary btn-sm\">Готово</button><button type=\"button\" class=\"btn btn-sm btn-default\" href=\"index.php?page=bugreport\" onclick=\"$(\'#log\').popover(\'hide\');\">Отмена</button></div></form>'});</script>";
-}
-else
+if (false)
 {
      $res = mysql_query("SELECT `id` FROM `games` WHERE (`first`='".$_SESSION['id']."' or `second`='".$_SESSION['id']."') AND `type` IN (2, 3) LIMIT 1;");
 	 if (mysql_num_rows($res) > 0)

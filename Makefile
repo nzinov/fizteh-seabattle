@@ -12,7 +12,7 @@ stop:
 start: build_debug
 	pgrep mono || (mono $(debugdir)/fizteh-seabattle-gameserver.exe &)
 test : check
-	sudo cp -r client/* /var/www/fizteh
+	cp -r client/* /var/www/fizteh
 deploy : deploy_client deploy_server
 deploy_client : check
 	cp -r client/* client_deployment/repo/
