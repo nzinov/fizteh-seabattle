@@ -156,7 +156,6 @@ $page = "main";
            if (authResult['status']['signed_in'])
            {
                gapi.client.load('plus','v1', function () {
-               $('#signinButton').hide();
                var request = gapi.client.plus.people.get(
                {
                   'userId': 'me'
@@ -165,6 +164,7 @@ $page = "main";
                {
                     str = "<img class='pull-left img-circle' height=45 src='" + resp['image']['url'] + "' /><p class=navbar-text>" + resp['displayName'] + "</p>";
                     document.getElementById("profile").innerHTML = str;
+                    $('#signinButton').hide();
                }); 
                });
             }
@@ -185,8 +185,6 @@ window.addEventListener('load', onload);
 			  <li id="bugreport"><a href="index.php?page=bugreport">Сообщить об ошибке</a></li>
 			  <li id="ai"><a class="indevelop" href="#" rel="tooltip" title="Разрабатывается">Бой программ</a></li>
             </ul>
-     <button id="signinButton" class="btn btn-primary navbar-btn">Войти через Google</button>
-<div  id="profile" class="pull-left"> </div>
 <?
 if (false)
 {
@@ -212,9 +210,11 @@ for ($i = 0; $i < $count; $i++)
 $content .= "<li>".mysql_result($res,$i,'login')."</li>";
 }
 $content .= "</ul>";
-echo "<button id=\"online\" class=\"btn btn-info navbar-btn\">$count онлайн</button>";
+echo "<button id=\"online\" class=\"btn btn-info navbar-btn pull-left\">$count онлайн</button>";
 echo "<script> $('#online').popover({placement: 'bottom', trigger: 'hover', title: 'Пользователи онлайн', content: '$content', html: true});</script>";
 ?>
+     <button id="signinButton" class="btn btn-primary navbar-btn">Войти через Google</button>
+    <span id="profile">  </div>
       </div>
     </div>
 </div>
