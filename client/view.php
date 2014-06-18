@@ -99,9 +99,9 @@ html,body {
     <meta name="description" content="">
     <meta name="author" content="">
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
-<link rel="shortcut icon" href="SBpic/favicon.png">
-<script type="text/javascript" src="json.js"></script>
-<script type="text/javascript" src="log_view.js"></script>
+<link rel="shortcut icon" href="/SBpic/favicon.png">
+<script type="text/javascript" src="/json.js"></script>
+<script type="text/javascript" src="/log_view.js"></script>
 <?php
 if ($type != "")
 {
@@ -321,7 +321,7 @@ function onMessage(evt)
                 else if (fig_player == 2)
                     pos.css("background-color", "#7fc7ff");
                 if (fig != 0)
-                    pos.attr("fig",fig).css("background-image","url('SBpic/"+figname[fig]+".png')");
+                    pos.attr("fig",fig).css("background-image","url('/SBpic/"+figname[fig]+".png')");
                 else pos.attr("fig",fig).css("background-image","none");
             }
         }

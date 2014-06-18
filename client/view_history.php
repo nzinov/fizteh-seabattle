@@ -80,9 +80,9 @@ html,body {
     <meta name="description" content="">
     <meta name="author" content="">
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
-<link rel="shortcut icon" href="SBpic/favicon.png">
-<script type="text/javascript" src="json.js"></script>
-<script type="application/javascript;version=1.7" src="log_view.js"></script>
+<link rel="shortcut icon" href="/SBpic/favicon.png">
+<script type="text/javascript" src="/json.js"></script>
+<script type="application/javascript;version=1.7" src="/log_view.js"></script>
 <?php
 if ($lines != false)
 {
@@ -184,7 +184,8 @@ function init()
         $(document.elementFromPoint(e.changedTouches[0].clientX, e.changedTouches[0].clientY)).mouseup();
         e.preventDefault();
     });
-    next();
+    var hash = (window.location.hash ? to_int(window.location.hash.substring(1)) : 0);
+    set_move(hash);
 }
 function onstatus()
 {
@@ -217,12 +218,13 @@ function set_fig(x, y, fig, player)
     else if (player == 2)
         pos.css("background-color", "#7fc7ff");
     if (fig != 0)
-        pos.attr("fig",fig).css("background-image","url('SBpic/"+figname[fig]+".png')");
+        pos.attr("fig",fig).css("background-image","url('/SBpic/"+figname[fig]+".png')");
     else pos.attr("fig",fig).css("background-image","none");
 }
 function update()
 {
     $('#move').val(move); 
+    document.location.hash = move;
 }
 function prev()
 {

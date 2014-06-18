@@ -125,9 +125,9 @@ html,body {
     <meta name="description" content="">
     <meta name="author" content="">
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
-<link rel="shortcut icon" href="SBpic/favicon.png">
-<script type="text/javascript" src="json.js"></script>
-<script type="text/javascript" src="log.js"></script>
+<link rel="shortcut icon" href="/SBpic/favicon.png">
+<script type="text/javascript" src="/json.js"></script>
+<script type="text/javascript" src="/log.js"></script>
 <?php
 if ($type != "")
 {
@@ -457,7 +457,7 @@ function setfig(x, y, fig)
 {
     field[x][y] = fig;
     if (fig != 0)
-        $("[id='"+x+":"+y+"']").attr("fig",fig).css("background-image","url('SBpic/"+figname[fig]+".png')");
+        $("[id='"+x+":"+y+"']").attr("fig",fig).css("background-image","url('/SBpic/"+figname[fig]+".png')");
     else $("[id='"+x+":"+y+"']").attr("fig",fig).css("background-image","none");
 }
 function onMessage(evt)
@@ -707,7 +707,7 @@ function AddBlock(str,fig,x,y)
     b_fig[n] = fig;
     b_x[n] = x;
     b_y[n] = y;
-    $("#answer").append("<tr><td onclick=b_click() height=64 width=64 style=\"background-image: url('SBpic/"+figname[fig]+".png');\" n=\""+n+"\"><h2>"+str+"</h2></td></tr>");
+    $("#answer").append("<tr><td onclick=b_click() height=64 width=64 style=\"background-image: url('/SBpic/"+figname[fig]+".png');\" n=\""+n+"\"><h2>"+str+"</h2></td></tr>");
 }
 function b_click()
 {
