@@ -191,7 +191,7 @@ if (false)
      $res = mysql_query("SELECT `id` FROM `games` WHERE (`first`='".$_SESSION['id']."' or `second`='".$_SESSION['id']."') AND `type` IN (2, 3) LIMIT 1;");
 	 if (mysql_num_rows($res) > 0)
 	 {
-		echo "<a href=\"WSTest.php?id=".mysql_result($res,0,'id')."\" class=\"btn btn-success\">В игру</a>";
+		echo "<a href=\"game.php?id=".mysql_result($res,0,'id')."\" class=\"btn btn-success\">В игру</a>";
 		$alert_type = 'warning';
 		$alert = "У вас есть активная игра: нажмите на кнопку в верхнем меню, чтобы начать её.";
 	 }

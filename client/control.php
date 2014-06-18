@@ -202,7 +202,7 @@ else if ($_POST['obj_navy'] > -1)
 	elseif ($_POST['action'] == 'attack')
 	{
 		$res = mysql_query("INSERT INTO `games` (`first`, `second`, `type`, `island`) VALUES ({$_SESSION['id']}, {$_POST['type']}, 2, {$navy['island']})");
-		alert("Вы атаковали флот. <a href=\"WSTest.php?id=".mysql_insert_id($res)."\" class=\"btn btn-success\">В игру</a>", 'info');
+		alert("Вы атаковали флот. <a href=\"game.php?id=".mysql_insert_id($res)."\" class=\"btn btn-success\">В игру</a>", 'info');
 		mysql_query("UPDATE `users` SET `isplaying` = 1 WHERE `id` IN ({$_SESSION['id']}, {$_POST['type']})");
 	}
 	echo "<h1>Ваш флот на острове {$isl['name']}</h1>
