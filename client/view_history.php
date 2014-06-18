@@ -19,7 +19,7 @@ if (mysql_num_rows($res) == 1)
     if ($status < 3)
         $error_msg = "Эта игра еще не началась";
     else if ($status == 3)
-        $error_msg = "Эта игра сейчас идет, вы можете посмотреть ее <a href=view.php/$id>трансляцию</a>";
+        $error_msg = "Эта игра сейчас идет, вы можете посмотреть ее <a href=/view.php/$id>трансляцию</a>";
     else
     {
         $fname = "$history_dir/$id.hist";
@@ -347,7 +347,7 @@ window.addEventListener("load", init, false);
         <?=$error_msg;?>
       </div>
         <div class="modal-footer">
-        <a type="button" class="btn btn-primary" href="index.php">Вернуться</a>
+        <a type="button" class="btn btn-primary" href="/index.php">Вернуться</a>
       </div>
     </div>
   </div>

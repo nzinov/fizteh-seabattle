@@ -24,7 +24,7 @@ else
         if ($status < 3)
             $error_msg = "Эта игра еще не началась";
         else if ($status > 3)
-            $error_msg = "Игра уже закончилась, что насчёт посмотреть <a href=view_history.php/$id>запись?</a>";
+            $error_msg = "Игра уже закончилась, что насчёт посмотреть <a href=/view_history.php/$id>запись?</a>";
         else if ($first == $_SESSION['login'] or $second == $_SESSION['login'])
             $error_msg = "Вы участвуете в этой игре, поэтому вам нельзя смотреть трансляцию";
         else
@@ -367,7 +367,7 @@ window.addEventListener("load", init, false);
         <?=$error_msg;?>
       </div>
         <div class="modal-footer">
-        <a type="button" class="btn btn-primary" href="index.php">Вернуться</a>
+        <a type="button" class="btn btn-primary" href="/index.php">Вернуться</a>
       </div>
     </div>
   </div>
