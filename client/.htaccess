@@ -1,0 +1,4 @@
+RewriteEngine On
+RewriteRule ^game.php/([0-9]+)$ game.php?id=$1
+RewriteRule ^view.php/([0-9]+)$ view.php?id=$1
+RewriteRule ^view_history.php/([0-9]+)$ view_history.php?id=$1
