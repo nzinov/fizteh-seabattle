@@ -26,7 +26,7 @@ else
         if ($status > 3)
         {
             $error_title = "Это матч завершен";
-            $error_msg = "Хотите посмотреть его в <a href=view_history.php?id=$id>записи</a>?";
+            $error_msg = "Хотите посмотреть его в <a href=view_history.php/$id>записи</a>?";
         }
         else if ($first == $_SESSION['login'])
         {
@@ -41,7 +41,7 @@ else
         else 
         {
             $error_title = "Вы не участвуете в этой игре";
-            $error_msg = "Это игра между $first и $second ".(is_null($island) ? "" : "за влияние на острове $island ")."<br/> Может быть вы хотите посмотреть <a href=\"view.php?id={$_GET['id']}\">трансляцию</a>?";
+            $error_msg = "Это игра между $first и $second ".(is_null($island) ? "" : "за влияние на острове $island ")."<br/> Может быть вы хотите посмотреть <a href=\"view.php/{$_GET['id']}\">трансляцию</a>?";
         }
     }
     else

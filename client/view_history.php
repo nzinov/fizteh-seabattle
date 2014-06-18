@@ -19,7 +19,7 @@ if (mysql_num_rows($res) == 1)
     if ($status < 3)
         $error_msg = "Эта игра еще не началась";
     else if ($status == 3)
-        $error_msg = "Эта игра сейчас идет, вы можете посмотреть ее <a href=view.php?id=$id>трансляцию</a>";
+        $error_msg = "Эта игра сейчас идет, вы можете посмотреть ее <a href=view.php/$id>трансляцию</a>";
     else
     {
         $fname = "$history_dir/$id.hist";
