@@ -11,7 +11,7 @@ else
     $link_id = mysql_connect($host, $username, $password);
     mysql_select_db($dbase,$link_id);
     mysql_query("set names 'utf8'");
-    $res = mysql_query("SELECT u1.login AS first, u2.login AS second, islands.name, games.type FROM `games`
+    $res = mysql_query("SELECT u1.name AS first, u2.name AS second, islands.name, games.type FROM `games`
         LEFT JOIN `islands` ON `islands`.id=games.island 
         JOIN `users` AS u1 ON u1.id=games.first
         JOIN `users` AS u2 ON u2.id=games.second
@@ -28,12 +28,12 @@ else
             $error_title = "Это матч завершен";
             $error_msg = "Хотите посмотреть его в <a href=/view_history.php/$id>записи</a>?";
         }
-        else if ($first == $_SESSION['login'])
+        else if ($first == $_SESSION['name'])
         {
             $type = $_GET['id']." 1";
             $opponent = $second;
         }
-        else if ($second == $_SESSION['login'])
+        else if ($second == $_SESSION['name'])
         {
             $type = $_GET['id']." 2";
             $opponent = $first;

@@ -1,15 +1,15 @@
 <?php
 session_start();
 include("constants.php");
-if (!isset($_SESSION['login']))
-    $error_msg = "Представьтесь, если вы хотите посмотреть трансляцию";
+if (!isset($_SESSION['id']))
+    $error_msg = "Войдите, если вы хотите посмотреть трансляцию";
 else
 {
     $id = $_GET['id'];
     $link_id = mysql_connect($host, $username, $password);
     mysql_select_db($dbase,$link_id);
     mysql_query("set names 'utf8'");
-    $res = mysql_query("SELECT u1.login AS first, u2.login AS second, islands.name, games.type FROM `games`
+    $res = mysql_query("SELECT u1.name AS first, u2.name AS second, islands.name, games.type FROM `games`
         LEFT JOIN `islands` ON `islands`.id=games.island 
         JOIN `users` AS u1 ON u1.id=games.first
         JOIN `users` AS u2 ON u2.id=games.second
@@ -25,7 +25,7 @@ else
             $error_msg = "Эта игра еще не началась";
         else if ($status > 3)
             $error_msg = "Игра уже закончилась, что насчёт посмотреть <a href=/view_history.php/$id>запись?</a>";
-        else if ($first == $_SESSION['login'] or $second == $_SESSION['login'])
+        else if ($first == $_SESSION['name'] or $second == $_SESSION['name'])
             $error_msg = "Вы участвуете в этой игре, поэтому вам нельзя смотреть трансляцию";
         else
             $type = $_GET['id']." -1";
@@ -116,7 +116,7 @@ var wsUri = "ws://server-seabattle.rhcloud.com:8000/";
 //var wsUri = "ws://10.0.1.6:8080/";
 var websocket;
 var output;
-var me = "<?=$_SESSION['login']?>";
+var me = "<?=$_SESSION['name']?>";
 var first = "<?=$first?>";
 var second = "<?=$second?>";
 var inputshown = false;

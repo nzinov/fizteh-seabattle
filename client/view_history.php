@@ -5,7 +5,7 @@ $link_id = mysql_connect($host, $username, $password);
 mysql_select_db($dbase,$link_id);
 mysql_query("set names 'utf8'");
 $id = $_GET['id'];
-$res = mysql_query("SELECT u1.login AS first, u2.login AS second, islands.name, games.type FROM `games`
+$res = mysql_query("SELECT u1.name AS first, u2.name AS second, islands.name, games.type FROM `games`
     LEFT JOIN `islands` ON `islands`.id=games.island 
     JOIN `users` AS u1 ON u1.id=games.first
     JOIN `users` AS u2 ON u2.id=games.second
