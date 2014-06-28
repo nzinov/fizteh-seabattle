@@ -1,115 +1,29 @@
 <?
 error_reporting(E_ALL);
 session_start();
-$admin = $_SESSION['login'] == "Коля";
-$tegs = array("Никак не сломаешь мозги?", "Выучил все дебюты?", "С детства любишь море?", "Океан: всегда огромен", "Джва года мечтаешь грабить корованы?");
-$rand = $tegs[rand(0,count($tegs)-1)];
+$state = $_SESSION['state'] = md5(rand());
+$signed_in = isset($_SESSION['id']);
+$admin = $_SESSION['id'] == "101947473722739654441";
+$tags = array("Никак не сломаешь мозги?", "Выучил все дебюты?", "С детства любишь море?", "Океан: всегда огромен", "Джва года мечтаешь грабить корованы?");
+$rand = $tags[rand(0,count($tags)-1)];
 if (isset($_GET['page']))
-$page = $_GET['page'];
+    $page = $_GET['page'];
 else  $page = "main";
 include("functions.php");
 $colors = array('default', 'success', 'info', 'warning', 'danger');
-$s = array("Открыт","Некорректное сообщение","Идет обсуждение","Требует изучения","Принят","Идет работа","Закрыт");
-$s_l = array("<span class=\"label label-danger\">Открыт</span>","<span class=\"label label-danger\">Некорректное сообщение</span>","<span class=\"label label-warning\">Идет обсуждение</span>","<span class=\"label label-warning\">Требует изучения</span>","<span class=\"label label-default\">Принят</span>","<span class=\"label label-info\">Идет работа</span>","<span class=\"label label-success\">Закрыт</span>");
-$t = array("Ошибка","Изменение");
-$p = array("Низкий","Средний","Высокий","Критический");
-$p_l = array("<span class=\"label label-default\">Низкий</span>","<span class=\"label label-info\">Средний</span>","<span class=\"label label-warning\">Высокий</span>","<span class=\"label label-danger\">Критический</span>");
 include("constants.php");
 $link_id = mysql_connect($host, $username, $password);
 mysql_select_db($dbase,$link_id);
 mysql_query("set names 'utf8'");
-if ($page == "addticket" and isset($_POST['theme']))
-{
-if (isset($_POST['id']))
-{
-$sql = "UPDATE `tickets` SET `theme` = '".htmlspecialchars($_POST['theme'])."', `type` = ".$_POST['type'].",`status` = ".$_POST['status'].",`priority` =  ".$_POST['priority']." WHERE `id`='".$_POST['id']."'";
-mysql_query($sql);
-$alert = "Изменения сохранены";
-$alert_type = "info";
-}
-else
-{
-$sql="INSERT INTO `tickets` (`theme`, `type`,`userposted`) VALUES ('".htmlspecialchars($_POST['theme'])."', '".$_POST['type']."','".$_SESSION['id']."');";
-mysql_query($sql);
-$sql="INSERT INTO `discussion` (`user`, `message`, `ticket`) VALUES ('".$_SESSION['id']."', '".htmlspecialchars($_POST['message'])."', '".mysql_insert_id() ."');";
-mysql_query($sql);
-$alert = "Твое сообщение успешно добавлено. Спасибо.";
-$alert_type = "success"; 
-}
-$page = "bugreport"; 
-}
-else if ($page == "logout")
-{
-mysql_query("UPDATE `users` SET `online`=SUBTIME(NOW(),'0 0:10:0') WHERE `id` = '".$_SESSION['id']."';");
-$alert = "До свидания, ".$_SESSION['login']."!";
-$alert_type = "info";
-$page = $_GET['reverse'];
-session_unset();
-session_destroy();
-}
-else if ($page == "post" and isset($_POST['message']))
-{
-$sql="INSERT INTO `discussion` (`user`, `message`, `ticket`) VALUES ('".$_SESSION['id']."', '".nl2br(htmlspecialchars($_POST['message']))."', '".$_POST['id']."');";
-mysql_query($sql);
-$sql = "UPDATE `tickets` SET `status` = 0 WHERE `id` = '".$_POST['id']."'";
-mysql_query($sql);
-$page = "ticket";
-$_GET['id'] = $_POST['id'];
-}
-else if ($page == "addnews" and isset($_POST['content']) and $admin)
+if ($page == "addnews" and isset($_POST['content']) and $admin)
 {
 $sql="INSERT INTO `news` (`title`, `content`, `color`) VALUES ('{$_POST['title']}', '".nl2br($_POST['content'])."', '".$_POST['color']."');";
 mysql_query($sql);
 $page = "main";
+//TODO: Tempotary
 }
-else if ($page == "login" and isset($_POST['login']))
-{
-$sql = "SELECT * FROM `users` WHERE `login` = '".$_POST['login']."';";
-$res = mysql_query($sql);
-if (mysql_num_rows($res)==0)
-{
-$alert = "Я тебя не знаю, ".$_POST['login'].". Хочешь я тебя запомню? <form action=\"index.php?page=register\" class=\"form-inline\" method=\"post\">".input_hidden("login",$_POST['login']).input_hidden("password",$_POST['password'])."<input type=\"submit\" class=\"btn btn-success\" value=\"Да, конечно\">";
-$alert_type = "info";
-}
-else
-{
-$password=mysql_result($res,0,'password');
-$rate=mysql_result($res,0,'rate');
-$id=mysql_result($res,0,'id');
-if ($password == md5($_POST['password']))
-{
-$_SESSION['login'] = $_POST['login'];
-$_SESSION['id'] = $id;
-$alert = "Приветствую тебя, ".$_SESSION['login'];
-$alert_type = "success";
-}
-else
-{
-$alert = "Неверный пароль";
-$alert_type = "error";
-}
-}
-$page = "main";
-}
-else if ($page == "register" and isset($_POST['login']))
-{
-$sql = "SELECT * FROM `users` WHERE `login` = '".$_POST['login']."';";
-$res = mysql_query($sql);
-if (mysql_num_rows($res)==0)
-{
-$sql = "INSERT INTO `users` (`login`, `password`, `rate`) VALUES ('".$_POST['login']."','".md5($_POST['password'])."',22000);";
-mysql_query($sql);
-$res = mysql_query("SELECT `id` FROM  `users` WHERE `login` = '".$_POST['login']."'");
-$alert_type = "success";
-$alert = "Будем знакомы, ".$_POST['login'].". Теперь представься еще раз, для проверки.";
-}
-else
-{
-$alert_type = "warning";
-$alert = "К сожалению, у меня уже есть знакомый, которого зовут точь в точь, как тебя.";
-}
-$page = "main";
-}
+if ($page == "map")
+    $page = "main";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -119,10 +33,10 @@ $page = "main";
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
+    <meta name="google-signin-accesstype" content="offline"/>
     <meta name="google-signin-callback" content="signinCallback" />
     <meta name="google-signin-clientid" content="220267231332-46hns53sk33pkpbqc4ohd1iu913nreu0.apps.googleusercontent.com" />
     <meta name="google-signin-cookiepolicy" content="single_host_origin" />
-    <meta name="google-signin-callback" content="signinCallback" />
     <meta name="google-signin-requestvisibleactions" content="https://schemas.google.com/AddActivity" />
     <meta name="google-signin-scope" content="https://www.googleapis.com/auth/plus.login" />
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
@@ -144,17 +58,19 @@ $page = "main";
     <link rel="shortcut icon" href="SBpic/favicon.png">
     <script type="text/javascript" src="https://apis.google.com/js/client:plusone.js"></script>
     <script type="text/javascript">
+       var signed_in = <?=($signed_in ? 'true': 'false')?>;
        function onload()
        {
        var signinButton = document.getElementById('signinButton');
        signinButton.addEventListener('click', function() {
-           gapi.auth.signIn(); // Will use page level configuration
+           gapi.auth.signIn();
        });
        }
        function signinCallback(authResult)
        {
            if (authResult['status']['signed_in'])
            {
+               $.post("/signin.php?act=connect&state=<?=$state?>&code="+authResult['code']);
                gapi.client.load('plus','v1', function () {
                var request = gapi.client.plus.people.get(
                {
@@ -171,43 +87,38 @@ $page = "main";
        }
 window.addEventListener('load', onload);
     </script>
-
   </head>
 
   <body data-spy="scroll"> 
     <div class="navbar navbar-default">
           <a class="navbar-brand" href="index.php">Морской бой по-физтеховски</a>
             <ul class="nav navbar-nav">
-              <li id="map"><a href="index.php?page=map">Карта</a></li>
+              <li id="map"><a class="indevelop" rel="tooltip" title="Временно недоступно" data_href="index.php?page=map">Карта</a></li>
               <li id="about"><a href="index.php?page=about">Об игре</a></li>
               <li id="rules"><a href="index.php?page=rules">Правила</a></li>
 			  <li id="rate"><a href="index.php?page=rate">Рейтинг</a></li>
-			  <li id="bugreport"><a href="index.php?page=bugreport">Сообщить об ошибке</a></li>
+			  <li id="bugreport"><a target="blank" href="https://github.com/nzinov/fizteh-seabattle/issues?state=open">Сообщить об ошибке</a></li>
 			  <li id="ai"><a class="indevelop" href="#" rel="tooltip" title="Разрабатывается">Бой программ</a></li>
             </ul>
 <?
-if (false)
+if ($signed_in)
 {
-     $res = mysql_query("SELECT `id` FROM `games` WHERE (`first`='".$_SESSION['id']."' or `second`='".$_SESSION['id']."') AND `type` IN (2, 3) LIMIT 1;");
+    $gid = $_SESSION['id'];
+     $res = mysql_query("SELECT `id` FROM `games` WHERE (`first`='$gid' or `second`='$gid') AND `type` IN (2, 3) LIMIT 1;");
 	 if (mysql_num_rows($res) > 0)
 	 {
 		echo "<a href=\"game.php/".mysql_result($res,0,'id')."\" class=\"btn btn-success\">В игру</a>";
 		$alert_type = 'warning';
 		$alert = "У вас есть активная игра: нажмите на кнопку в верхнем меню, чтобы начать её.";
 	 }
-	 $res = mysql_query("SELECT * FROM `users` WHERE `id` = ".$_SESSION['id']);
-	 $rate = mysql_result($res,0,'rate');
-     echo "<button id=\"user\"class=\"btn btn-primary navbar-btn\"><span class=\"glyphicon glyphicon-user\"></span> ".$_SESSION['login']."</button>";
-	 $content = '<p>Рейтинг: '.$rate.'</p><a class="btn btn-danger" href="index.php?page=logout&reverse=$page">Выход</a>';
-	 echo "<script> $('#user').popover({placement: 'bottom', trigger: 'click', title: '".$_SESSION['login']."', content: '$content', html: true});</script>";
-	 mysql_query("UPDATE `users` SET `online`=NOW() WHERE `id` = '".$_SESSION['id']."';");
+	 mysql_query("UPDATE `users` SET `online`=NOW() WHERE `id` = '$gid';");
 }
-$res = mysql_query("SELECT `login` FROM `users` WHERE  `online`>SUBTIME(NOW(),'0 0:10:0')");
+$res = mysql_query("SELECT `name` FROM `users` WHERE  `online`>SUBTIME(NOW(),'0 0:10:0')");
 $count = mysql_num_rows($res);
 $content = "<ul>";
 for ($i = 0; $i < $count; $i++)
 {
-$content .= "<li>".mysql_result($res,$i,'login')."</li>";
+$content .= "<li>".mysql_result($res,$i,'name')."</li>";
 }
 $content .= "</ul>";
 echo "<button id=\"online\" class=\"btn btn-info navbar-btn pull-left\">$count онлайн</button>";
@@ -313,11 +224,11 @@ else if ($page == "map")
 	  <script>
 	  islands = {
 	  <?php
-	  $res = mysql_query("SELECT islands.*, users.login FROM `islands` LEFT JOIN users ON islands.owner=users.id");
+	  $res = mysql_query("SELECT islands.*, users.name FROM `islands` LEFT JOIN users ON islands.owner=users.id");
 	  while ($row =  mysql_fetch_array($res))
 	  {
 	  echo $row['id'].': ["'.$row['name'].'",'.$row['owner'].','.$row['buildings'].','.$row['res'].','.$row['res_mine'].','.$row['res_coef'].',';
-	  echo $row['res_max'].','.$row['max_mine'].',"'.$row['login'].'"],';
+	  echo $row['res_max'].','.$row['max_mine'].',"'.$row['name'].'"],';
 	  }
 	  ?>
 	  }
@@ -440,87 +351,29 @@ else if ($page == "map")
 	  }
 	  else if ($page == "rate")
 	  {
-$sql = "SELECT `login`,`rate` FROM `users` ORDER BY `rate` DESC";
+$sql = "SELECT `name`,`rate` FROM `users` ORDER BY `rate` DESC";
 $res=mysql_query($sql);
 echo "<div class=\"row\"><div class=\"span12\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>Имя</th><th>Рейтинг</th></tr></thead><tbody>";
 $last = 0;
 for ($n=0;$n<mysql_num_rows($res);$n++) {
-	$login=mysql_result($res,$n,'login');
+	$name=mysql_result($res,$n,'name');
 	$rate=mysql_result($res,$n,'rate');
 	if ($rate <> $last)
 	{
 		$last = $rate;
 		$count = $n+1;
 	}
-	if ($login == $_SESSION['login'])
-		$output .= "<tr class='success'>";
+	if ($name == $_SESSION['name'])
+		echo "<tr class='success'>";
 	else
-		$output .= "<tr>";
-	$output =  $output."<td>$count</td><td>$login</td><td>$rate</td></tr>";
+		echo "<tr>";
+	echo "<td>$count</td><td>$name</td><td>$rate</td></tr>";
 }
-echo $output."</tbody></table></div></div>";
+echo "</tbody></table></div></div>";
 }
-	  else if ($page == "bugreport")
-	  {
-echo "<a class=\"btn btn-primary\" href=\"index.php?page=report\">Сообщить об ошибке</a><br>";
-echo "<div class=\"row\"><div class=\"span12\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>Тип</th><th>Описание</th><th>Статус</th><th>Приоритет</th></tr></thead><tbody>";
-$sql = "SELECT `type`,`theme`,`status`,`priority`,`id` FROM `tickets` ORDER BY `status`, `priority` DESC";
-$res=mysql_query($sql);
-for ($n=0;$n<mysql_num_rows($res);$n++) {
-$theme=mysql_result($res,$n,'theme');
-$type=mysql_result($res,$n,'type');
-$status=mysql_result($res,$n,'status');
-$priority=mysql_result($res,$n,'priority');
-$id=mysql_result($res,$n,'id');
-$output =  $output."<tr ><td>".($n+1)."</td><td>".$t[$type]."</td><td><a href=\"index.php?page=ticket&id=$id\">".$theme."</a></td><td>".$s_l[$status]."</td><td>".$p_l[$priority]."</td></tr>";
-}
-echo $output."</tbody></table></div></div>";
-}
-	  else if ($page == "ai")
-	  {
-	  ?>
-	  <?php
-	  }
-	  else if ($page == "report")
-	  {
-echo form(array("action" => "addticket", "reverse" => "index.php?page=bugreport"),
-input_text("theme","Краткое описание"),
-input_textarea("message","Ваше сообщение"),
-input_select("type","Тип",$t));
-	  }
-	  else if ($page == "ticket")
-	  {
-	  include("constants.php");
-$link_id = mysql_connect($host, $username, $password);
-mysql_select_db($dbase,$link_id);
-mysql_query("set names 'utf8'");
-$id = $_GET['id'];
-$sql = "SELECT `type`,`theme`,`status`,`priority` FROM `tickets` WHERE `id`='$id';";
-$res=mysql_query($sql);
-$theme=mysql_result($res,0,'theme');
-$type=mysql_result($res,0,'type');
-$status=mysql_result($res,0,'status');
-$priority=mysql_result($res,0,'priority');
-echo form(array("action" => "addticket", "reverse" => "index.php?page=bugreport"),
-input_hidden("id",$id),
-input_text("theme","Тема сообщения",$theme,$admin),
-input_select("type","Тип",$t,$type,$admin),
-input_select("status","Статус",$s,$status,$admin),
-input_select("priority","Приоритет",$p,$priority,$admin));
-echo "<div class=\"row\"><div class=\"span12\"><table class=\"table table-striped\"><thead><tr><th>Пользователь</th><th>Сообщение</th><th>Опубликовано</th></tr></thead><tbody>";
-$sql = "SELECT `users`.`login`,`discussion`.`message`,`discussion`.`published` FROM `discussion`,`users` WHERE `users`.`id` = `discussion`.`user` AND `discussion`.`ticket` = '$id' ORDER BY `discussion`.`published` DESC";
-$res=mysql_query($sql);
-for ($n=0;$n<mysql_num_rows($res);$n++) {
-$user=mysql_result($res,$n,'login');
-$message=mysql_result($res,$n,'message');
-$published=mysql_result($res,$n,'published');
-$output =  $output."<tr><td>$user</td><td>$message</td><td>$published</td></tr>";
-}
-echo $output."</tbody></table>";
-echo form(array("action" => "post", "reverse" => "index.php?page=bugreport"),input_textarea("message","Ваше сообщение"),input_hidden("id",$id));
-}	  ?>
+?>
       <footer>
-        <p>&copy; Зинов Николай 2013</p>
+        <p>&copy; Зинов Николай 2014</p>
       </footer>
 
     </div> <!-- /container -->
