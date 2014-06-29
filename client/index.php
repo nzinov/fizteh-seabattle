@@ -33,8 +33,6 @@ if ($page == "map")
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
-    <meta name="google-signin-accesstype" content="offline"/>
-    <meta name="google-signin-callback" content="signinCallback" />
     <meta name="google-signin-clientid" content="220267231332-46hns53sk33pkpbqc4ohd1iu913nreu0.apps.googleusercontent.com" />
     <meta name="google-signin-cookiepolicy" content="single_host_origin" />
     <meta name="google-signin-requestvisibleactions" content="https://schemas.google.com/AddActivity" />
@@ -56,37 +54,6 @@ if ($page == "map")
     </style>
     <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
     <link rel="shortcut icon" href="SBpic/favicon.png">
-    <script type="text/javascript" src="https://apis.google.com/js/client:plusone.js"></script>
-    <script type="text/javascript">
-       var signed_in = <?=($signed_in ? 'true': 'false')?>;
-       function onload()
-       {
-       var signinButton = document.getElementById('signinButton');
-       signinButton.addEventListener('click', function() {
-           gapi.auth.signIn();
-       });
-       }
-       function signinCallback(authResult)
-       {
-           if (authResult['status']['signed_in'])
-           {
-               $.post("/signin.php?act=connect&state=<?=$state?>&code="+authResult['code']);
-               gapi.client.load('plus','v1', function () {
-               var request = gapi.client.plus.people.get(
-               {
-                  'userId': 'me'
-               });
-               request.execute(function (resp)
-               {
-                    str = "<img class='pull-left img-circle' height=45 src='" + resp['image']['url'] + "' /><p class=navbar-text>" + resp['displayName'] + "</p>";
-                    document.getElementById("profile").innerHTML = str;
-                    $('#signinButton').hide();
-               }); 
-               });
-            }
-       }
-window.addEventListener('load', onload);
-    </script>
   </head>
 
   <body data-spy="scroll"> 
@@ -103,15 +70,43 @@ window.addEventListener('load', onload);
 <?
 if ($signed_in)
 {
-    $gid = $_SESSION['id'];
-     $res = mysql_query("SELECT `id` FROM `games` WHERE (`first`='$gid' or `second`='$gid') AND `type` IN (2, 3) LIMIT 1;");
+    $id = $_SESSION['id'];
+     $res = mysql_query("SELECT `id` FROM `games` WHERE (`first`='$id' or `second`='$id') AND `type` IN (2, 3) LIMIT 1;");
 	 if (mysql_num_rows($res) > 0)
 	 {
 		echo "<a href=\"game.php/".mysql_result($res,0,'id')."\" class=\"btn btn-success\">В игру</a>";
 		$alert_type = 'warning';
 		$alert = "У вас есть активная игра: нажмите на кнопку в верхнем меню, чтобы начать её.";
 	 }
-	 mysql_query("UPDATE `users` SET `online`=NOW() WHERE `id` = '$gid';");
+	 mysql_query("UPDATE `users` SET `online`=NOW() WHERE `id` = '$id';");
+     echo "<img class='pull-left img-circle' height=45 src='{$_SESSION['image_url']}' /><p class=navbar-text>{$_SESSION['name']}</p>";
+}
+else
+{
+?>
+    <button id='signinButton' class='btn btn-primary navbar-btn'>Войти через Google</button>
+    <script type="text/javascript" src="https://apis.google.com/js/client:plusone.js"></script>
+    <script type="text/javascript">
+       function onload()
+       {
+           var signinButton = document.getElementById('signinButton');
+           signinButton.addEventListener('click', function() {
+               gapi.auth.signIn({
+                'callback': signinCallback,
+                'accesstype': 'ofline'});
+           });
+       }
+       function signinCallback(authResult)
+       {
+           if (authResult['status']['signed_in'])
+           {
+               $.post("/signin.php?act=connect&state=<?=$state?>&code="+authResult['code']);
+               location.reload();
+           }
+       }
+       window.addEventListener('load', onload);
+    </script>
+<?
 }
 $res = mysql_query("SELECT `name` FROM `users` WHERE  `online`>SUBTIME(NOW(),'0 0:10:0')");
 $count = mysql_num_rows($res);
@@ -124,8 +119,6 @@ $content .= "</ul>";
 echo "<button id=\"online\" class=\"btn btn-info navbar-btn pull-left\">$count онлайн</button>";
 echo "<script> $('#online').popover({placement: 'bottom', trigger: 'hover', title: 'Пользователи онлайн', content: '$content', html: true});</script>";
 ?>
-     <button id="signinButton" class="btn btn-primary navbar-btn">Войти через Google</button>
-    <span id="profile">  </div>
       </div>
     </div>
 </div>
@@ -139,9 +132,9 @@ if (isset($alert))
     echo "</div>";
 	echo "<script>$('.alert').alert()</script>";
 }
-	  if ($page == "main")
-	  {
-	  ?>
+if ($page == "main")
+{
+?>
 	<div class="jumbotron">
         <h1>Добро пожаловать</h1>
         <p><? echo $rand;?> - Морской бой по-физтеховски!</p>
