@@ -367,6 +367,7 @@ echo "</tbody></table></div></div>";
 ?>
       <footer>
         <p>&copy; Зинов Николай 2014</p>
+        <a href="https://plus.google.com/109229859109198130360" rel="publisher">Google+</a>
       </footer>
 
     </div> <!-- /container -->

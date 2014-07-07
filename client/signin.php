@@ -41,6 +41,8 @@ else if ($act == "connect")
             ->getAttributes();
         $gplus_id = $attributes["payload"]["sub"];
         $_SESSION['token'] = json_encode($token);
+        if (mysql_num_rows(mysql_query("SELECT * FROM `banned` WHERE `id` = '$gplus_id';")) > 0)
+            die("Banned user");
         $sql = "SELECT * FROM `users` WHERE `gid` = $gplus_id;";
         $res = mysql_query($sql);
         $me = $plus->people->get('me');
