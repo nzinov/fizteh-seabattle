@@ -1,54 +1,47 @@
 <?php
 session_start();
 include("constants.php");
-if ($_GET['pass'] == "ribapila")
+$id = $_GET['id'];
+$link_id = mysql_connect($host, $username, $password);
+mysql_select_db($dbase,$link_id);
+mysql_query("set names 'utf8'");
+$res = mysql_query("SELECT u1.name AS first, u2.name AS second, islands.name, games.type FROM `games`
+    LEFT JOIN `islands` ON `islands`.id=games.island 
+    JOIN `users` AS u1 ON u1.id=games.first
+    JOIN `users` AS u2 ON u2.id=games.second
+    WHERE games.`id`={$_GET['id']};");
+$first = mysql_result($res,0,'first');
+$second = mysql_result($res,0,'second');
+$island = mysql_result($res,0,'name');
+$status = mysql_result($res,0,'type');
+$type = "";
+if (mysql_num_rows($res) == 1)
 {
-    $type = $_GET['type'];
+    if ($status > 3)
+    {
+        $error_title = "Это матч завершен";
+        $error_msg = "Хотите посмотреть его в <a href=/view_history.php/$id>записи</a>?";
+    }
+    else if ($first == $_SESSION['name'])
+    {
+        $type = $_GET['id']." 1";
+        $opponent = $second;
+    }
+    else if ($second == $_SESSION['name'])
+    {
+        $type = $_GET['id']." 2";
+        $opponent = $first;
+    }
+    else 
+    {
+        $error_title = "Вы не участвуете в этой игре";
+        $error_msg = "Это игра между $first и $second ".(is_null($island) ? "" : "за влияние на острове $island ")."<br/> Может быть вы хотите посмотреть <a href=\"/view.php/{$_GET['id']}\">трансляцию</a>?";
+    }
 }
 else
 {
-    $id = $_GET['id'];
-    $link_id = mysql_connect($host, $username, $password);
-    mysql_select_db($dbase,$link_id);
-    mysql_query("set names 'utf8'");
-    $res = mysql_query("SELECT u1.name AS first, u2.name AS second, islands.name, games.type FROM `games`
-        LEFT JOIN `islands` ON `islands`.id=games.island 
-        JOIN `users` AS u1 ON u1.id=games.first
-        JOIN `users` AS u2 ON u2.id=games.second
-        WHERE games.`id`={$_GET['id']};");
-    $first = mysql_result($res,0,'first');
-    $second = mysql_result($res,0,'second');
-    $island = mysql_result($res,0,'name');
-    $status = mysql_result($res,0,'type');
-    $type = "";
-    if (mysql_num_rows($res) == 1)
-    {
-        if ($status > 3)
-        {
-            $error_title = "Это матч завершен";
-            $error_msg = "Хотите посмотреть его в <a href=/view_history.php/$id>записи</a>?";
-        }
-        else if ($first == $_SESSION['name'])
-        {
-            $type = $_GET['id']." 1";
-            $opponent = $second;
-        }
-        else if ($second == $_SESSION['name'])
-        {
-            $type = $_GET['id']." 2";
-            $opponent = $first;
-        }
-        else 
-        {
-            $error_title = "Вы не участвуете в этой игре";
-            $error_msg = "Это игра между $first и $second ".(is_null($island) ? "" : "за влияние на острове $island ")."<br/> Может быть вы хотите посмотреть <a href=\"/view.php/{$_GET['id']}\">трансляцию</a>?";
-        }
-    }
-    else
-    {
-       $error_title = "Игра не найдена";
-       $error_msg = "Возможно вам подсунули неправильную ссылку";
-    }
+   $error_title = "Игра не найдена";
+   $error_msg = "Возможно вам подсунули неправильную ссылку";
 }
 ?>
 <!DOCTYPE html>
@@ -64,30 +57,38 @@ html,body {
       width: 100%;
 }
 #info {
-      position: fixed;
-      right: 20px;
-      top: 5px;
+      float: left;
+      width: calc(100% - 100vh - 20px);
+      margin-top: 5px;
+      margin-bottom: 40px;
+      height: 100%;
+}
+#header {
+      height: 30%;
+      margin-bottom: 0px;
+      text-align: center;
 }
 #output {
-      aling: right;
       overflow: auto;
-      margin-bottom: 20px;
+      height: 70%;
 }
 #input {
       position: fixed;
       right: 20px;
       bottom: 5px;
-      aling: right;
       display: none;
       width: 252px;
 }
 #answer{
       position: fixed;
-      top: 5px;
       display: none;
       overflow: auto;
-      max-height: 100%;
       left: 20px;
+      top: 5px;
+}
+#answer.bottom{
+      top: auto;
+      bottom: 5px;
 }
 #answer td{
       color: white;
@@ -97,22 +98,27 @@ html,body {
       font-weight: bold;
 }
 #field {
+      width: 100vh;
       margin-top: 5px;
       margin-left: 10px;
-      min-height: 100%;
-      max-width: auto;
-      overflow: auto;
+      float: left;
       border: 0px;
 }
-.log {
+.message {
       color: blue;
+      background-color: #H0HHFF;
 }
 .square {
       outline: 1px solid black;
       border: 0px;
       padding: 0px;
       margin: 0px;
-      background-size:100% 100%;
+      width: 7vh;
+      height: 7vh;
+      background-size: 100% 100%;
+}
+span.nowrap {
+      display: inline-block;
 }
 }
 </style>
@@ -231,15 +237,8 @@ function init()
         }
     }
     $(window).resize(function (){
-        sq = ($(window).height()-20)/14;
-        $(".square").width(sq);
-        $(".square").height(sq);
-        margin = ($(window).width()-sq*14);
-        $("#info").width(margin-40);
-        $("#output").height($(window).height()-$("#header").height()-65);
         $("#output").scrollTop($("#output > div").height());
     }).resize();
-    output = document.getElementById("output");
     testWebSocket();
     $("body").keydown(function (evt) {
         //alert (evt.which)
@@ -364,11 +363,6 @@ function displace()
     else droppable($("[id^='9:'],[id^='10:'],[id^='11:'],[id^='12:'],[id^='13:']"),false);
     localStorage.removeItem(DB_KEY);
 }
-function onstatus()
-{
-    $("#output").height($(window).height()-$("#header").height()-65);
-    $("#output").scrollTop($("#output > div").height());
-}
 function movepass()
 {
     movepassed = true;
@@ -464,6 +458,7 @@ function onMessage(evt)
 {
     console.log('<span style="color: blue;">Сообщение от сервера: ' + evt.data+'</span>');
     mess = JSON.parse(evt.data);
+    onbottom = ($("#output").scrollTop() > $("#output > div").height() - $("#output").height());
     if (mess.action == 1)
     {
         phase = mess.phase;
@@ -477,10 +472,10 @@ function onMessage(evt)
                     body : "Действуйте в игре с "+opponent,
                 });
             }
-            document.title = "<Действуйте!> Игра против "+opponent;
+            document.title = "<Действуйте!> Морской бой против "+opponent;
         }
         else
-            document.title = "Игра против "+opponent;
+            document.title = "Морской бой против "+opponent;
         switch(phase)
         {
         case 0:
@@ -585,18 +580,18 @@ function onMessage(evt)
             block[cor[0]][cor[1]] = true;
             AddBlock(1,field[cor[0]][cor[1]],[cor[0]],[cor[1]]);
             $(".square").click(FindBlock);
+            if (cor[0] < 5)
+                $("#answer").addClass("bottom");
+            else
+                $("#answer").removeClass("bottom");
             $("#answer").show();
             break;
         }
-        onstatus();
     }
     else if (mess.action == 4)
     {
-        onbottom = ($("#output").scrollTop() > $("#output > div").height() - $("#output").height());
         if (mess.player == 0) $("#output > div").append("<p class=\"log\">"+mess.message+"<p>");
         else $("#output > div").append("<p style=\"color: "+(mess.player == you ? "gray" : "black")+"\">"+mess.message+"<p>");
-        if (onbottom)
-            $("#output").scrollTop($("#output > div").height());
     }
     else if (mess.action == 3)
     {
@@ -617,6 +612,10 @@ function onMessage(evt)
         you = mess.you;
         $("#main").html("Соединено с сервером. Ждите, пока подключится ваш противник.");
     }
+    if (onbottom)
+        $('#output').stop().animate({
+              scrollTop: $("#output")[0].scrollHeight
+        }, 800);
 }
 function onError(evt)
 {
@@ -767,7 +766,7 @@ for ($i = 0; $i < 14;$i++)
 </div>
 <div id="info">
 <div id="header" class="well center-block">
-<h4><?=$first?> vs. <?=$second?><br/>
+<h4><span class="nowrap"><?=$first?></span> vs <span class="nowrap"><?=$second?></span><br/>
 <?
 if (!is_null($island))
 {
