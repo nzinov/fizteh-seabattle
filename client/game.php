@@ -50,27 +50,74 @@ else
 
 <title>Морской бой по-физтеховски</title>
 <style>
+@media (min-height: 600px) {
+    #badge {
+        display: none;
+    }
+    #info {
+          float: left;
+          width: calc(100% - 100vh - 20px);
+    }
+    .square {
+          width: 7vh;
+          height: 7vh;
+    }
+    #field {
+      width: 100vh;
+      float: left;
+    }
+}
+@media (max-height: 600px) {
+    html, body {
+        overflow: auto
+    }
+    #badge {
+        position: relative;
+        width: 30px;
+        left: -42px;
+        background-color: #9C9C9C;
+        border-radius: 5px 0 0 5px;
+        padding: 5px;
+    }
+    #info {
+          position: fixed;
+          width: 400px;
+          top: 0px;
+          right: -380px;
+          padding-left: 10px;
+          background-color: white;
+          border-left: 2px solid blue;
+          transition: right 500ms ease 0s;
+    }
+    #info.shown {
+          right: 5px;
+    }
+    .square {
+          width: 6.5vw;
+          height: 6.5vw;
+    }
+    #field {
+    }
+}
 html,body {
-      position: fixed;
       overflow: hidden;
       height: 100%;
       width: 100%;
 }
 #info {
-      float: left;
-      width: calc(100% - 100vh - 20px);
       margin-top: 5px;
       margin-bottom: 40px;
       height: 100%;
 }
 #header {
-      height: 30%;
       margin-bottom: 0px;
       text-align: center;
+      overflow: hidden;
+      height: 25%;
 }
 #output {
-      overflow: auto;
-      height: 70%;
+      overflow-y: scroll;
+      height: 75%;
 }
 #input {
       position: fixed;
@@ -98,10 +145,8 @@ html,body {
       font-weight: bold;
 }
 #field {
-      width: 100vh;
       margin-top: 5px;
       margin-left: 10px;
-      float: left;
       border: 0px;
 }
 .message {
@@ -113,8 +158,6 @@ html,body {
       border: 0px;
       padding: 0px;
       margin: 0px;
-      width: 7vh;
-      height: 7vh;
       background-size: 100% 100%;
 }
 span.nowrap {
@@ -315,6 +358,8 @@ function init()
         page_visible = false;
     };
     Notification.requestPermission();
+    for (var i = 0; i < 50; i++)
+        $("#output > div").append("<p>asd</p>");
 }
 function testWebSocket()
 {
@@ -765,6 +810,7 @@ for ($i = 0; $i < 14;$i++)
 </table>
 </div>
 <div id="info">
+<div id="badge" onclick="$('#info').toggleClass('shown')"><span class="glyphicon glyphicon-arrow-left"></span></div>
 <div id="header" class="well center-block">
 <h4><span class="nowrap"><?=$first?></span> vs <span class="nowrap"><?=$second?></span><br/>
 <?
