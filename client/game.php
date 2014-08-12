@@ -83,9 +83,10 @@ else
         overflow: auto
     }
     #badge {
-        position: relative;
-        width: 30px;
-        left: -42px;
+        position: absolute;
+        width: 20px;
+        left: -20px;
+        bottom: 20px;
         background-color: #9C9C9C;
         border-radius: 5px 0 0 5px;
         padding: 5px;
@@ -820,7 +821,7 @@ for ($i = 0; $i < 14;$i++)
 </table>
 </div>
 <div id="info">
-<div id="badge" onclick="$('#info').toggleClass('shown')"><span class="glyphicon glyphicon-arrow-left"></span></div>
+<div id="badge" onclick="$('#info').toggleClass('shown')"><span class="glyphicon glyphicon-align-justify"></span></div>
 <div id="header" class="well center-block">
 <h4><span class="nowrap"><?=$first?></span> vs <span class="nowrap"><?=$second?></span><br/>
 <?
