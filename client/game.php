@@ -2,46 +2,57 @@
 session_start();
 include("constants.php");
 $id = $_GET['id'];
-$link_id = mysql_connect($host, $username, $password);
-mysql_select_db($dbase,$link_id);
-mysql_query("set names 'utf8'");
-$res = mysql_query("SELECT u1.name AS first, u2.name AS second, islands.name, games.type FROM `games`
-    LEFT JOIN `islands` ON `islands`.id=games.island 
-    JOIN `users` AS u1 ON u1.id=games.first
-    JOIN `users` AS u2 ON u2.id=games.second
-    WHERE games.`id`={$_GET['id']};");
-$first = mysql_result($res,0,'first');
-$second = mysql_result($res,0,'second');
-$island = mysql_result($res,0,'name');
-$status = mysql_result($res,0,'type');
-$type = "";
-if (mysql_num_rows($res) == 1)
+$opponent = "";
+if ($id == "test" && $_SESSION['id'] == 3)
 {
-    if ($status > 3)
-    {
-        $error_title = "Это матч завершен";
-        $error_msg = "Хотите посмотреть его в <a href=/view_history.php/$id>записи</a>?";
-    }
-    else if ($first == $_SESSION['name'])
-    {
-        $type = $_GET['id']." 1";
-        $opponent = $second;
-    }
-    else if ($second == $_SESSION['name'])
-    {
-        $type = $_GET['id']." 2";
-        $opponent = $first;
-    }
-    else 
-    {
-        $error_title = "Вы не участвуете в этой игре";
-        $error_msg = "Это игра между $first и $second ".(is_null($island) ? "" : "за влияние на острове $island ")."<br/> Может быть вы хотите посмотреть <a href=\"/view.php/{$_GET['id']}\">трансляцию</a>?";
-    }
+    $type = "prompt";
+    $first = "Тестовая игра";
+    $second = "";
+    $island = null;
 }
 else
 {
-   $error_title = "Игра не найдена";
-   $error_msg = "Возможно вам подсунули неправильную ссылку";
+    $link_id = mysql_connect($host, $username, $password);
+    mysql_select_db($dbase,$link_id);
+    mysql_query("set names 'utf8'");
+    $res = mysql_query("SELECT u1.name AS first, u2.name AS second, islands.name, games.type FROM `games`
+        LEFT JOIN `islands` ON `islands`.id=games.island 
+        JOIN `users` AS u1 ON u1.id=games.first
+        JOIN `users` AS u2 ON u2.id=games.second
+        WHERE games.`id`={$_GET['id']};");
+    $first = mysql_result($res,0,'first');
+    $second = mysql_result($res,0,'second');
+    $island = mysql_result($res,0,'name');
+    $status = mysql_result($res,0,'type');
+    $type = "";
+    if (mysql_num_rows($res) == 1)
+    {
+        if ($status > 3)
+        {
+            $error_title = "Это матч завершен";
+            $error_msg = "Хотите посмотреть его в <a href=/view_history.php/$id>записи</a>?";
+        }
+        else if ($first == $_SESSION['name'])
+        {
+            $type = $_GET['id']." 1";
+            $opponent = $second;
+        }
+        else if ($second == $_SESSION['name'])
+        {
+            $type = $_GET['id']." 2";
+            $opponent = $first;
+        }
+        else 
+        {
+            $error_title = "Вы не участвуете в этой игре";
+            $error_msg = "Это игра между $first и $second ".(is_null($island) ? "" : "за влияние на острове $island ")."<br/> Может быть вы хотите посмотреть <a href=\"/view.php/{$_GET['id']}\">трансляцию</a>?";
+        }
+    }
+    else
+    {
+       $error_title = "Игра не найдена";
+       $error_msg = "Возможно вам подсунули неправильную ссылку";
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -184,8 +195,7 @@ if ($type != "")
 <script language="javascript" type="text/javascript">
 var debug = true;
 var showlog = false;
-
-
+var type = "<?=$type?>";
 var wsUri = "ws://<?=($_SERVER['HTTP_HOST'] == 'localhost' ? "localhost" : "server-seabattle.rhcloud.com")?>:8000/";
 var opponent = '<?=$opponent;?>';
 var websocket;
@@ -282,6 +292,8 @@ function init()
     $(window).resize(function (){
         $("#output").scrollTop($("#output > div").height());
     }).resize();
+    if (type == "prompt")
+        type = prompt("Enter '<game id> <player num (1 / 2)>':");
     testWebSocket();
     $("body").keydown(function (evt) {
         //alert (evt.which)
@@ -358,8 +370,6 @@ function init()
         page_visible = false;
     };
     Notification.requestPermission();
-    for (var i = 0; i < 50; i++)
-        $("#output > div").append("<p>asd</p>");
 }
 function testWebSocket()
 {
@@ -371,7 +381,7 @@ function testWebSocket()
 }
 function onOpen(evt)
 {
-    doSend("<?echo $type?>");
+    doSend(type);
     console.info("Подключено к серверу");
 }
 function onClose(evt)
