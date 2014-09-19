@@ -37,6 +37,18 @@ $output .=  "<option value=$i $sel>".$options[$i]."</option>";
 $output .= "</select></div>";
 return $output;
 }
+function input_select_key($name, $label, $options, $default = 0,$enabled = true)
+{
+$output =  "<div class=\"form-group\"><label for=\"$name\">$label</label><select class=\"form-control\" ".($enabled ? "" : "disabled ")." id=\"$name\" name=\"$name\">";
+foreach ($options as $key => $value)
+{
+if ($default == $key) $sel = "selected";
+else $sel = "";
+$output .=  "<option value=$key $sel>".$value."</option>";
+}
+$output .= "</select></div>";
+return $output;
+}
 function val($val, $def)
 {
 if (isset($val)) return $val;

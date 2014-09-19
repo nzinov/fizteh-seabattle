@@ -3,7 +3,7 @@ error_reporting(E_ALL);
 session_start();
 $state = $_SESSION['state'] = md5(rand());
 $signed_in = isset($_SESSION['id']);
-$admin = $signed_in && $_SESSION['id'] == "101947473722739654441";
+$admin = $signed_in && $_SESSION['id'] == "3";
 $tags = array("Никак не сломаешь мозги?", "Выучил все дебюты?", "С детства любишь море?", "Океан: всегда огромен", "Джва года мечтаешь грабить корованы?");
 $rand = $tags[rand(0,count($tags)-1)];
 if (isset($_GET['page']))
@@ -21,6 +21,11 @@ $sql="INSERT INTO `news` (`title`, `content`, `color`) VALUES ('{$_POST['title']
 mysql_query($sql);
 $page = "main";
 //TODO: Tempotary
+}
+else if ($page == "addgame" and $admin)
+{
+	mysql_query("INSERT INTO `games` (`first`, `second`, `type`) VALUES ({$_REQUEST['first']}, {$_REQUEST['second']}, 2)");
+	$page = "admin";
 }
 if ($page == "map")
     $page = "main";
@@ -363,6 +368,25 @@ for ($n=0;$n<mysql_num_rows($res);$n++) {
 	echo "<td>$count</td><td>$name</td><td>$rate</td></tr>";
 }
 echo "</tbody></table></div></div>";
+}
+else if ($page == "admin")
+{
+	if ($admin)
+	{
+		$res = mysql_query("SELECT `id`, `name` FROM `users`");
+		$players = array();
+		while ($row = mysql_fetch_array($res))
+		{
+			$players[$row['id']] = $row['name'];
+		}
+		echo form(array("action" => "addgame", "reverse" => "index.php", "method" => "POST"),
+		input_select_key("first", "Первый", $players),
+		input_select_key("second", "Второй", $players));
+	}
+	else
+	{
+		echo "Доступ запрещён";
+	}
 }
 ?>
       <footer>
