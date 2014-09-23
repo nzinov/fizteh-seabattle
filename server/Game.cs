@@ -334,7 +334,6 @@ namespace SeaBattleServer
         {
             started = true;
             new System.Net.WebClient().DownloadString("http://fizteh-seabattle.rhcloud.com/support.php?code=zekfor2967&page=start&id="+game_id);
-
         }
 
         public void Displace(byte[,] f, byte p)
@@ -1157,26 +1156,29 @@ namespace SeaBattleServer
 			mess.changex = new List<int>();
 			mess.changey = new List<int>();
 			mess.changefig = new List<int>();
-			for (int i = 0; i < 14; i++) {
-				for (int j = 0; j < 14; j++) {
-					Fig fig = field[i, j];
-					if (fig.fig != FigType.Null) {
-						mess.changex.Add(i);
-						mess.changey.Add(j);
-						if (p == 0)
-							mess.changefig.Add((int)fig.fig + fig.player * 100);
-						else {
-							if (fig.player == p) {
-								mess.changefig.Add((int)fig.fig);
-							} else if (fig.player == 0) {
-								mess.changefig.Add((int)FigType.Sinking);
-							} else {
-								mess.changefig.Add((int)FigType.Unknown);
-							}
-						}
-					}
-				}
-			}
+			if (phase != PhaseType.Displacing)
+                for (int i = 0; i < 14; i++)
+                {
+                    for (int j = 0; j < 14; j++)
+                    {
+                        Fig fig = field[i, j];
+                        if (fig.fig != FigType.Null) {
+                            mess.changex.Add(i);
+                            mess.changey.Add(j);
+                            if (p == 0)
+                                mess.changefig.Add((int)fig.fig + fig.player * 100);
+                            else {
+                                if (fig.player == p) {
+                                    mess.changefig.Add((int)fig.fig);
+                                } else if (fig.player == 0) {
+                                    mess.changefig.Add((int)FigType.Sinking);
+                                } else {
+                                    mess.changefig.Add((int)FigType.Unknown);
+                                }
+                            }
+                        }
+                    }
+                }
 			Send(mess, client);
 			PhaseChange(phase, player, p);
 			lock (event_log)
