@@ -62,6 +62,9 @@ else
 <title>Морской бой по-физтеховски</title>
 <style>
 @media (min-height: 600px) {
+    html, body {
+      overflow: hidden;
+    }
     #badge {
         display: none;
     }
@@ -112,7 +115,6 @@ else
     }
 }
 html,body {
-      overflow: hidden;
       height: 100%;
       width: 100%;
 }
