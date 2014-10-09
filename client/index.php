@@ -105,8 +105,7 @@ else
        {
            if (authResult['status']['signed_in'])
            {
-               $.post("/signin.php?act=connect&state=<?=$state?>&code="+authResult['code']);
-               location.reload();
+               $.post("/signin.php?act=connect&state=<?=$state?>&code="+authResult['code'], location.reload);
            }
        }
        window.addEventListener('load', onload);
