@@ -416,10 +416,10 @@ function displace()
         alert('Расставьте все корабли');
         return;
     }
+    SendJSON({action: 1, phase: 0, field: f});
     for (var i = 0; i < 14; i++)
         for (var j = 0; j < 14; j++)
             setfig(i, j, 0);
-    SendJSON({action: 1, phase: 0, field: f});
     if (you == 1) droppable($("[id^='0:'],[id^='1:'],[id^='2:'],[id^='3:'],[id^='4:']"),false);
     else droppable($("[id^='9:'],[id^='10:'],[id^='11:'],[id^='12:'],[id^='13:']"),false);
     $(".square").css("background-color","#FFFFFF");
