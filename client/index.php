@@ -101,11 +101,15 @@ else
                 'accesstype': 'ofline'});
            });
        }
+       function reload_page()
+       {
+           location.reload();
+       }
        function signinCallback(authResult)
        {
            if (authResult['status']['signed_in'])
            {
-               $.post("/signin.php?act=connect&state=<?=$state?>&code="+authResult['code'], location.reload);
+               $.post("/signin.php?act=connect&state=<?=$state?>&code="+authResult['code'], reload_page);
            }
        }
        window.addEventListener('load', onload);
