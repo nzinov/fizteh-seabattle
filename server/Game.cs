@@ -909,6 +909,7 @@ namespace SeaBattleServer
 				history = new System.IO.StreamWriter(history_fname, true);
 			history.Write(msg);
 			history.Write('\n');
+            history.Flush();
 		}
 
         bool FindSquare(byte x, byte y, FigType f, byte p)

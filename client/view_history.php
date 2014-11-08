@@ -82,12 +82,12 @@ html,body {
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
 <link rel="shortcut icon" href="/SBpic/favicon.png">
 <script type="text/javascript" src="/json.js"></script>
-<script type="application/javascript;version=1.7" src="/log_view.js"></script>
+<script type="text/javascript" src="/log_view.js"></script>
 <?php
 if ($lines != false)
 {
     echo "<script>";
-    echo "var history = [[";
+    echo "var game_history = [[";
     foreach ($lines as $line_num => $line)
     {
         if ($line == '|')
@@ -245,13 +245,13 @@ function prev()
 function next()
 {
     onstatus();
-    if (move == history.length)
+    if (move == game_history.length)
     {
         pause();
         return;
     }
     move++;
-    var cur = history[move];
+    var cur = game_history[move];
     restore[move] = [];
     for (var i = 0; i < cur.length; i++)
     {
