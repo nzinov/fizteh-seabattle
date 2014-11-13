@@ -85,18 +85,18 @@ if ($signed_in)
 else
 {
 ?>
-    <button id='signinButton' class='btn btn-primary navbar-btn navbar-right'>Войти через Google</button>
     <script type="text/javascript" src="https://apis.google.com/js/client:plusone.js"></script>
+    <div class="btn navbar-btn navbar-right">
+    <span id="signinButton">
+      <span
+        class="btn g-signin navbar-btn navbar-right"
+        data-callback="signinCallback"
+        data-accesstype="offline"
+        data-theme="dark">
+      </span>
+    </span>
+    </div>
     <script type="text/javascript">
-       function onload()
-       {
-           var signinButton = document.getElementById('signinButton');
-           signinButton.addEventListener('click', function() {
-               gapi.auth.signIn({
-                'callback': signinCallback,
-                'accesstype': 'ofline'});
-           });
-       }
        function reload_page()
        {
            location.reload();
@@ -108,7 +108,6 @@ else
                $.post("/signin.php?act=connect&state=<?=$state?>&code="+authResult['code'], reload_page);
            }
        }
-       window.addEventListener('load', onload);
     </script>
 <?
 }
