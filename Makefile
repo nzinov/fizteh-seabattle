@@ -11,13 +11,11 @@ stop:
 	@pkill mono || echo "Application is stopped"
 start: build_debug
 	pgrep mono || (mono $(debugdir)/fizteh-seabattle-gameserver.exe &)
-test : check
-	cp -r client/. /var/www/fizteh
 deploy : deploy_client deploy_server
-deploy_client : check
+deploy_client :
 	cp -r client/. client_deployment/repo/
 	cd client_deployment && tar -czf production.tar.gz *
-	rhc deploy client_deployment/production.tar.gz --app fizteh --hot-deploy
+	rhc deploy client_deployment/production.tar.gz --app development --hot-deploy
 	rm client_deployment/production.tar.gz
 	touch deploy_client
 deploy_server : build
@@ -33,6 +31,3 @@ build_debug : server/*.cs stop
 	xbuild /p:Configuration=Debug server/fizteh-seabattle-gameserver.sln
 	(mono $(debugdir)/fizteh-seabattle-gameserver.exe &)
 	touch build_debug
-check : client/*.php
-	cd client; find . -name \*.php -exec php -l "{}" \;
-

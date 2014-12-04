@@ -1,0 +1,5 @@
+#!/var/lib/openshift/54690b684382ec633700001b/python/virtenv/venv/bin/python3.3
+if __name__ == '__main__':
+    import sys, pydoc
+    sys.exit(pydoc.cli())
+
