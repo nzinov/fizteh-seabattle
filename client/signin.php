@@ -43,24 +43,29 @@ else if ($act == "connect")
         $_SESSION['token'] = json_encode($token);
         if (mysql_num_rows(mysql_query("SELECT * FROM `banned` WHERE `id` = '$gplus_id';")) > 0)
             die("Banned user");
-        $sql = "SELECT * FROM `users` WHERE `gid` = $gplus_id;";
+        error_log("gplus= $gplus_id");
+        $sql = "SELECT * FROM `users` WHERE `gid` = '$gplus_id';";
         $res = mysql_query($sql);
         $me = $plus->people->get('me');
         if (mysql_num_rows($res)==0)
         {
             $name = $me->getDisplayName();
-            $sql = "INSERT INTO `users` (`gid`, `name`, `rate`) VALUES ($gplus_id, '$name', 22000);";
+            $sql = "INSERT INTO `users` (`gid`, `name`, `rate`) VALUES ('$gplus_id', '$name', 22000);";
             mysql_query($sql);
             $id = mysql_insert_id();
+            error_log("if");
         }
         else
         {
             $name = mysql_result($res, 0, 'name');
             $id = mysql_result($res, 0, 'id');
+            error_log("else");
         }
         $_SESSION['name'] = $name;
         $_SESSION['id'] = $id;
+        error_log("id = $id, name = $name");
         $_SESSION['image_url'] = $me->getImage()->getUrl();
     }
+    error_log("outer scope");
 }
 ?>

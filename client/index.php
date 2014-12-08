@@ -19,7 +19,7 @@ if ($page == "addnews" and isset($_POST['content']) and $admin)
 $sql="INSERT INTO `news` (`title`, `content`, `color`) VALUES ('{$_POST['title']}', '".nl2br($_POST['content'])."', '".$_POST['color']."');";
 mysql_query($sql);
 $page = "main";
-//TODO: Tempotary
+//TODO: Temporary
 }
 else if ($page == "addgame" and $admin)
 {
