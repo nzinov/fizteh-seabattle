@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Net;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Text;
 using Newtonsoft.Json;
 
@@ -333,7 +335,7 @@ namespace SeaBattleServer
         public void Start()
         {
             started = true;
-            new System.Net.WebClient().DownloadString("http://fizteh-seabattle.rhcloud.com/support.php?code=zekfor2967&page=start&id="+game_id);
+            NotifyServer("start", game_id.ToString());
         }
 
         public void Displace(byte[,] f, byte p)
@@ -1032,6 +1034,18 @@ namespace SeaBattleServer
 
 		private object this_lock = new object();
 
+        private void NotifyServer(params string[] command) {
+            string c = String.Join(":", command);
+            string s = Program.GetSignature(c);
+            using (var wb = new WebClient())
+            {
+                var data = new NameValueCollection();
+                data["command"] = c;
+                data["signature"] = s;
+                wb.UploadValues("http://phystech-seabattle.rhcloud.com/support/", "POST", data);
+            }
+        }
+
         public void ProcessRequest(string text, byte p)
 		{
 			FromClient mess = JsonConvert.DeserializeObject<FromClient>(text);
@@ -1101,7 +1115,7 @@ namespace SeaBattleServer
 							break;
 						if (player_offered_draw == Opponent(p)) {
 							PhaseChange(PhaseType.Finished, 0);
-							new System.Net.WebClient().DownloadString("http://fizteh-seabattle.rhcloud.com/support.php?code=zekfor2967&page=draw&id=" + game_id);
+                            NotifyServer("end", game_id.ToString(), "0");
 							Finish();
 						} else
 							player_offered_draw = p;
@@ -1128,7 +1142,7 @@ namespace SeaBattleServer
         internal void Loose(byte p)
         {
             PhaseChange(PhaseType.Finished, Opponent(p));
-            new System.Net.WebClient().DownloadString("http://fizteh-seabattle.rhcloud.com/support.php?code=zekfor2967&page=win&winner="+Opponent(p)+"&id="+game_id);
+            NotifyServer("end", game_id.ToString(), Opponent(p).ToString());
 			Finish();
         }
 

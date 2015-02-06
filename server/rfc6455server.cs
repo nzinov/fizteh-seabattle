@@ -147,12 +147,17 @@ namespace SeaBattleServer
             _clientThread = new System.Threading.Thread(ts);
             _clientThread.Start();
             onmessage = GameChoose;
-            this.version = version;
         }
 
         private void GameChoose(string message, byte p)
         {
-            int[] words = message.Split(' ').Select(x => int.Parse(x)).ToArray();
+            if (!Program.CheckSignature(message)) {
+                Send("corrupted signature");
+                Finish();
+                Close();
+                return;
+            }
+            int[] words = message.Split(':')[0].Split('x').Select(x => int.Parse(x)).ToArray();
             if (!Program.Games.ContainsKey(words[0]))
             {
                 Program.Games.Add(words[0],new Game(words[0]));

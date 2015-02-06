@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net.Sockets;
 using System.Net;
+using System.Security.Cryptography;
 using Newtonsoft.Json;
 using Mono.Unix;
 using Mono.Unix.Native;
@@ -15,6 +16,7 @@ namespace SeaBattleServer
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
+        static string SECRET = "test";
         static string dump_fname, log_fname;
 		[STAThread]
         static void Main()
@@ -22,6 +24,12 @@ namespace SeaBattleServer
 			Program.Games = new Dictionary<int, Game>();
 			dump_fname = Environment.GetEnvironmentVariable("OPENSHIFT_DATA_DIR")+"games.dump";
 			log_fname = Environment.GetEnvironmentVariable("OPENSHIFT_DIY_LOG_DIR") + "errors.log";
+            string data_dir = Environment.GetEnvironmentVariable("OPENSHIFT_DATA_DIR");
+            if (data_dir != null) {
+				System.IO.TextReader file = new System.IO.StreamReader(data_dir+"secret_token.txt", true);
+				SECRET = file.ReadToEnd();
+				file.Close();
+            }
 			if (System.IO.File.Exists(dump_fname))
 			{
 				System.IO.TextReader file = new System.IO.StreamReader(dump_fname, true);
@@ -66,6 +74,15 @@ namespace SeaBattleServer
             System.IO.TextWriter log = new System.IO.StreamWriter(log_fname, true);
             log.WriteLine(mes);
             log.Close();
+        }
+        public static string GetSignature(string data) {
+            byte[] hash = SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(data+Program.SECRET));
+            return Convert.ToBase64String(hash);
+        }
+        public static bool CheckSignature(string sig)
+        {
+            string[] parts = sig.Split(':');
+            return GetSignature(parts[0]) == parts[1];
         }
     }
 }

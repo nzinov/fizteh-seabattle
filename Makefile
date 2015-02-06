@@ -1,11 +1,4 @@
-usage :
-	@echo "Here go possible comands for fizteh-seabattle developing"
-	@echo "	deploy[_server/client] - deploys version in working tree to the producton server"
-	@echo "	build - builds Release configuration of server"
-	@echo "	build_debug - builds Debug configuration and restarts server"
-	@echo "	test - make and start local server"
-	@echo "	check - checks php syntax"
-.PHONY : usage deploy test start stop
+.PHONY : deploy test start stop
 debugdir = server/bin/Debug
 stop:
 	@pkill mono || echo "Application is stopped"
