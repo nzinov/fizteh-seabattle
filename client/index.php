@@ -2,8 +2,7 @@
 session_start();
 $state = $_SESSION['state'] = md5(rand());
 $signed_in = isset($_SESSION['id']);
-$admin = $signed_in && $_SESSION['id'] == "3";
-$tags = array("Никак не сломаешь мозги?", "Выучил все дебюты?", "С детства любишь море?", "Океан: всегда огромен", "Джва года ждал эту игры?");
+$tags = array("Никак не сломаешь мозги?", "Выучил все дебюты?", "С детства любишь море?", "Океан: всегда огромен", "Джва года ждал эту игру?");
 $rand = $tags[rand(0,count($tags)-1)];
 if (isset($_GET['page']))
     $page = $_GET['page'];
@@ -14,6 +13,7 @@ include("constants.php");
 $link_id = mysql_connect($host, $username, $password);
 mysql_select_db($dbase,$link_id);
 mysql_query("set names 'utf8'");
+$admin = $signed_in && (mysql_num_rows(mysql_query("SELECT `id` FROM `admins` WHERE `id` = {$_SESSION['id']}")) > 0);
 if ($page == "addnews" and isset($_POST['content']) and $admin)
 {
 $sql="INSERT INTO `news` (`title`, `content`, `color`) VALUES ('{$_POST['title']}', '".nl2br($_POST['content'])."', '".$_POST['color']."');";
@@ -66,6 +66,7 @@ if ($page == "map")
             <ul class="nav navbar-nav">
               <li id="rules"><a href="index.php?page=rules">Правила</a></li>
 			  <li id="rate"><a href="index.php?page=rate">Рейтинг</a></li>
+			  <li id="admin"><a href="index.php?page=admin">Администрирование</a></li>
 			  <li id="bugreport"><a target="blank" href="https://github.com/nzinov/fizteh-seabattle/issues?state=open">Сообщить об ошибке</a></li>
             </ul>
 <?
@@ -261,7 +262,7 @@ $sql = "SELECT `name`,`rate` FROM `users` ORDER BY `rate` DESC";
 $res=mysql_query($sql);
 echo "<div class=\"row\"><div class=\"col-md-12\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>Имя</th><th>Рейтинг</th></tr></thead><tbody>";
 $last = 0;
-for ($n=0;$n<mysql_num_rows($res);$n++) {
+for ($n=0;$n<mysql_num_rows($ret);$n++) {
 	$name=mysql_result($res,$n,'name');
 	$rate=mysql_result($res,$n,'rate');
 	if ($rate <> $last)
@@ -293,7 +294,7 @@ else if ($page == "admin")
 	}
 	else
 	{
-		echo "Доступ запрещён";
+		echo "<div class=\"alert alert-error\">Доступ запрещён</div>";
 	}
 }
 ?>
