@@ -77,7 +77,7 @@ namespace SeaBattleServer
         }
         public static string GetSignature(string data) {
             byte[] hash = SHA1.Create().ComputeHash(Encoding.ASCII.GetBytes(data+Program.SECRET));
-            return Convert.ToBase64String(hash);
+            return Convert.ToBase64String(hash).Replace('+', '-').Replace('/', '_');
         }
         public static bool CheckSignature(string sig)
         {
