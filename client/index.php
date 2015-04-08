@@ -258,11 +258,11 @@ else if ($page == "map")
 	  else if ($page == "rate")
 	  {
 echo "<h3 class=text-center'>Рейтинг Эло всех зарегистрированных игроков</h3>";
-$sql = "SELECT `name`,`rate` FROM `users` ORDER BY `rate` DESC";
+$sql = "SELECT `name`,`rate` FROM `users` ORDER BY `rate` DESC, `name`";
 $res=mysql_query($sql);
 echo "<div class=\"row\"><div class=\"col-md-12\"><table class=\"table table-striped\"><thead><tr><th>#</th><th>Имя</th><th>Рейтинг</th></tr></thead><tbody>";
 $last = 0;
-for ($n=0;$n<mysql_num_rows($ret);$n++) {
+for ($n=0;$n<mysql_num_rows($res);$n++) {
 	$name=mysql_result($res,$n,'name');
 	$rate=mysql_result($res,$n,'rate');
 	if ($rate <> $last)
@@ -294,7 +294,7 @@ else if ($page == "admin")
 	}
 	else
 	{
-		echo "<div class=\"alert alert-error\">Доступ запрещён</div>";
+		echo "<div class='alert alert-error'>Доступ запрещён</div>";
 	}
 }
 ?>

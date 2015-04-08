@@ -443,6 +443,13 @@ function setshot(t)
     isshot = t;
     $("#shot").html((isshot ? "Стреляйте" : "Ходите"));
     setcursor((isshot ? 0 : 9));
+    if (isshot) {
+        isaoe = false;
+        trigaoe();
+        $("#aoe").show();
+    } else {
+        $("#aoe").hide();
+    }
 }
 function ondrop(evt)
 {
