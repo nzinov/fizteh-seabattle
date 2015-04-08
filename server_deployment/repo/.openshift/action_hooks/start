@@ -5,4 +5,4 @@
 export PATH=$PATH:$OPENSHIFT_DATA_DIR/mono/bin/
 export LD_LIBRARY_PATH=$OPENSHIFT_DATA_DIR/mono/lib/
 cd $OPENSHIFT_REPO_DIR/diy
-mono fizteh-seabattle-gameserver.exe &
+daemon mono fizteh-seabattle-gameserver.exe
