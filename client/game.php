@@ -391,7 +391,7 @@ function onClose(evt)
 {
     console.info("Соединение закрыто");
 }
-c_type = ["url(displace_grab.cur), pointer", "url(displace.cur), move", "url(move.cur), move", "url(shot.cur), crosschair", "url(attack.cur), help", "url(radar.png) 15 15, wait", "pointer"];
+c_type = ["url(/displace_grab.cur), pointer", "url(/displace.cur), move", "url(/move.cur), move", "url(/shot.cur), crosschair", "url(/attack.cur), help", "url(/radar.png) 15 15, wait", "pointer"];
 function setcursor(type)
 {
     $(".square, body").css("cursor", c_type[type]);
